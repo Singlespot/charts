@@ -60,6 +60,16 @@ case $key in
     shift
     shift
     ;;
+    --control-center-admin)
+    cc_admin="$2"
+    shift
+    shift
+    ;;
+    --control-center-password)
+    cc_password="$2"
+    shift
+    shift
+    ;;
     --service-gcs-account-key-file)
     service_account_file="$2"
     shift
@@ -88,6 +98,8 @@ done
 
 namespace=${namespace:-pulsar}
 release=${release:-pulsar-dev}
+cc_admin=${cc_admin:-admin}
+cc_password=${cc_password:-$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)}
 service_gcs_account_file=${service_gcs_account_file:-"/pulsar/keys/gcs.json"}
 pulsar_superusers=${pulsar_superusers:-"proxy-admin,broker-admin,admin,pulsar-manager-admin"}
 
@@ -97,7 +109,11 @@ function generate_service_account_credentials() {
         --from-file="gcs.json=${service_gcs_account_file}"
 }
 
-pulsar_superusers=${pulsar_superusers:-"proxy-admin,broker-admin,admin,pulsar-manager-admin"}
+function generate_cc_admin_credentials() {
+    local secret_name="pulsar-control-center-admin-secret"
+    kubectl create secret generic ${secret_name} -n ${namespace} \
+        --from-literal="admin-user=${cc_admin}" --from-literal="admin-password=${cc_password}"
+}
 
 function do_create_namespace() {
     if [[ "${create_namespace}" == "true" ]]; then
@@ -106,6 +122,9 @@ function do_create_namespace() {
 }
 
 do_create_namespace
+
+echo "create the credentials for the admin user of control center (grafana & pulsar-manager)"
+generate_cc_admin_credentials
 
 echo "create the credentials for the service account key file (offload data to gcs)"
 generate_service_account_credentials

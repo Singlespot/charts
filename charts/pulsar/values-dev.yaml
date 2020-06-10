@@ -25,7 +25,7 @@ initialize: true
 ###
 
 ## Namespace to deploy pulsar
-namespace: pulsar
+namespace: pulsar-dev
 namespaceCreate: false
 
 ###
@@ -78,7 +78,7 @@ components:
   # broker
   broker: true
   # functions
-  functions: true
+  functions: false
   # proxy
   proxy: true
   # toolset
@@ -926,7 +926,7 @@ proxy:
     pulsarssl: 6651
   service:
     annotations: {}
-    type: ClusterIP
+    type: LoadBalancer
     extraSpec: {}
   ## Proxy PodDisruptionBudget
   ## templates/proxy-pdb.yaml
@@ -1172,7 +1172,7 @@ grafana:
 
   ## Extra environment variables that will be pass onto deployment pods
   env:
-    GF_SERVER_ROOT_URL: "https://pulsar-grafana.singlespot.com"
+    GF_SERVER_ROOT_URL: "https://pulsar-grafana-dev.singlespot.com"
     GF_AUTH_GITHUB_ENABLED: "true"
     GF_AUTH_GITHUB_ALLOW_SIGN_UP: "true"
     GF_AUTH_GITHUB_ALLOWED_ORGANIZATIONS: "Singlespot"
@@ -1274,6 +1274,7 @@ grafana:
       # Otherwise the namespace in which the sidecar is running will be used.
       # It's also possible to specify ALL to search in all namespaces
       searchNamespace: null
+
 
 ## Monitoring Stack: node_exporter
 ## templates/node-exporter.yaml
@@ -1382,7 +1383,9 @@ pulsar_manager:
   ## templates/pulsar-manager-service.yaml
   ##
   service:
-    spec: {}
+    port: 443
+    spec:
+      type: LoadBalancer
     annotations:
       service.beta.kubernetes.io/aws-load-balancer-ssl-cert: "arn:aws:acm:eu-west-1:268324876595:certificate/d65266d3-b4ab-43da-b35d-c75681ee6371"
   ## pulsar manager configmap
@@ -1551,10 +1554,10 @@ partitionedTopics:
 
 prometheusJobs:
   - jobName: copy-api
-    host: pulsar-copy-metrics.singlespot.com
+    host: pulsar-copy-metrics-dev.singlespot.com
   - jobName: geocoding-api
-    host: geocoding-api-metrics.singlespot.com
+    host: geocoding-api-metrics-dev.singlespot.com
   - jobName: producer-api
-    host: pulsar-producer-metrics.singlespot.com
+    host: pulsar-producer-metrics-dev.singlespot.com
 
-servicesNamespace: pulsar-services
+servicesNamespace: pulsar-services-dev

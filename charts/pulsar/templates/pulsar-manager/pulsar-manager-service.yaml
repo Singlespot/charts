@@ -34,7 +34,8 @@ spec:
 {{- end }}
   ports:
     - name: frontend
-      port: {{ .Values.pulsar_manager.ports.frontend }}
+      port: {{ .Values.pulsar_manager.service.port }}
+      targetPort: {{ .Values.pulsar_manager.ports.frontend }}
       protocol: TCP
   selector:
     app: {{ template "pulsar.name" . }}

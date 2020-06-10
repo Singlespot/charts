@@ -50,6 +50,11 @@ data:
         - '{{ template "pulsar.fullname" . }}-{{ .Values.pulsar_detector.component }}:{{ .Values.pulsar_detector.port }}'
         {{- end }}
       metrics_path: {{ template "pulsar.control_center_path.prometheus" . }}/metrics
+    {{- range .Values.prometheusJobs }}
+    - job_name: '{{ .jobName }}'
+      static_configs:
+      - targets: ['{{ .host }}:9102']
+    {{- end }}
     - job_name: 'kubernetes-pods'
 {{- if .Values.auth.authentication.enabled }}
 {{- if eq .Values.auth.authentication.provider "jwt" }}
@@ -118,6 +123,25 @@ data:
           regex: (.+)
           target_label: __metrics_path__
           replacement: /api/v1/nodes/${1}/proxy/metrics/cadvisor
+{{/*      metric_relabel_configs:*/}}
+{{/*        - source_labels: [namespace]*/}}
+{{/*          regex: '^({{ .Values.namespace | replace "-" "\\-" }}|{{ .Values.servicesNamespace | replace "-" "\\-" }})$'*/}}
+{{/*          action: keep*/}}
+{{/*        - action: replace*/}}
+{{/*          source_labels: [name]*/}}
+{{/*          regex: '^(.*)$'*/}}
+{{/*          target_label: previous_name*/}}
+{{/*          replacement: '${1}'*/}}
+{{/*        - action: replace*/}}
+{{/*          source_labels: [namespace, pod]*/}}
+{{/*          regex: '^{{ .Values.namespace | replace "-" "\\-" }};{{ template "pulsar.fullname" . }}\-(.*)$'*/}}
+{{/*          target_label: name*/}}
+{{/*          replacement: 'pulsar-${1}'*/}}
+{{/*        - action: replace*/}}
+{{/*          source_labels: [namespace, pod]*/}}
+{{/*          regex: '^{{ .Values.servicesNamespace | replace "-" "\\-" }};(.*)$'*/}}
+{{/*          target_label: name*/}}
+{{/*          replacement: 'services-${1}'*/}}
   rules.yml: |
 {{- if .Values.monitoring.alert_manager -}}
 {{- with .Values.alert_manager.rules }}

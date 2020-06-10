@@ -17,7 +17,7 @@
 # under the License.
 #
 
-apiVersion: v1
+apiVersion: v2
 appVersion: "1.0"
 description: Apache Pulsar Helm chart for Kubernetes
 name: pulsar
@@ -29,3 +29,11 @@ icon: http://pulsar.apache.org/img/pulsar.svg
 maintainers:
 - name: StreamNative Support
   email: support@streamnative.io
+dependencies:
+- name: loki-stack
+  version: 0.36.1
+  repository: https://grafana.github.io/loki/charts
+  condition: monitoring.loki
+- name: grafana
+  version: 5.1.4
+  repository: https://kubernetes-charts.storage.googleapis.com
