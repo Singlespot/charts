@@ -66,9 +66,9 @@ spec:
           - >
             apk add curl;
             curl -H "Content-Type: application/json" \
-                 -X PUT \
-                 http://{{ template "pulsar.fullname" . }}-{{ .Values.pulsar_manager.component }}-backend:{{ .Values.pulsar_manager.ports.backend }}/pulsar-manager/users/superuser \
-                 -d '{"name": '\"$SUPERUSER_NAME\"', "password": '\"$SUPERUSER_PASSWORD\"', "description": "{{ .Values.pulsar_manager.superuser.description }}", "email": "{{ .Values.pulsar_manager.superuser.email }}"}'
+               -X PUT \
+               http://{{ template "pulsar.fullname" . }}-{{ .Values.pulsar_manager.component }}-backend:{{ .Values.pulsar_manager.ports.backend }}/pulsar-manager/users/superuser \
+               -d '{"name": '\"$SUPERUSER_NAME\"', "password": '\"$SUPERUSER_PASSWORD\"', "description": "{{ .Values.pulsar_manager.superuser.description }}", "email": "{{ .Values.pulsar_manager.superuser.email }}"}'
       restartPolicy: Never
 {{- end }}
 {{- end }}

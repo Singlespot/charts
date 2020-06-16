@@ -360,7 +360,7 @@ ingress:
     tls:
       termination: false
   control_center:
-    enabled: true
+    enabled: false
     component: control-center
     endpoints:
       grafana: true
@@ -524,10 +524,10 @@ bookkeeper:
   metadata:
     image:
       # the image used for running `bookkeeper-cluster-initialize` job
-      # repository: apachepulsar/pulsar-all
-      # tag: 2.5.0
-      repository: streamnative/platform
-      tag: v1.0.0
+      repository: apachepulsar/pulsar-all
+      tag: 2.5.2
+      # repository: streamnative/platform
+      # tag: v1.0.0
       pullPolicy: IfNotPresent
     ## Set the resources used for running `bin/bookkeeper shell initnewcluster`
     ##
@@ -699,10 +699,10 @@ pulsar_metadata:
   component: pulsar-init
   image:
     # the image used for running `pulsar-cluster-initialize` job
-    # repository: apachepulsar/pulsar-all
-    # tag: 2.5.0
-    repository: streamnative/platform
-    tag: v1.0.0
+    repository: apachepulsar/pulsar-all
+    tag: 2.5.2
+    # repository: streamnative/platform
+    # tag: v1.0.0
     pullPolicy: IfNotPresent
   ## set an existing configuration store
   # configurationStore:
@@ -1396,7 +1396,9 @@ pulsar_manager:
     description: "Pulsar Manager Admin"
     email: support@pulsar.io
   redirect:
-    host: localhost
+    scheme: https
+    host: pulsar-manager-dev.singlespot.com
+    port: 443
   scripts:
     backend_entrypoint:
       command: /pulsar-manager/pulsar-manager/bin/pulsar-manager
