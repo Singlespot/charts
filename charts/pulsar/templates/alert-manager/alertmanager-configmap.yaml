@@ -28,8 +28,13 @@ metadata:
     component: {{ .Values.alert_manager.component }}
 data:
   # For more configuration about the alert manager, please refer to https://prometheus.io/docs/alerting/configuration/
-  alertmanager.yml: |
+  alertmanager.yml.tmpl: |
 {{- with .Values.alert_manager.config }}     
 {{ toYaml . | indent 4 }}
+{{- end }}
+{{- if .Values.alert_manager.extraConfigFiles }}
+{{- with .Values.alert_manager.extraConfigFiles }}
+{{ toYaml . | indent 2 }}
+{{- end }}
 {{- end }}
 {{- end }}

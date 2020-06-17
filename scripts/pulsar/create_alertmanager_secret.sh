@@ -24,10 +24,9 @@ This script is used to bootstrap the pulsar namespace before deploying a helm ch
 Options:
        -h,--help                        prints the usage message
        -n,--namespace                   the k8s namespace to install the pulsar helm chart
-       --client-id                      GitHub OAuth app client id
-       --client-secret                  GitHub OAuth app client secret
+       --slack-api-url                  Slack API url
 Usage:
-    $0 --namespace pulsar --client-id <client_id> --client-secret <client_secret>
+    $0 --namespace pulsar --slack-api-url <slack_api_url>
 EOF
 }
 
@@ -42,13 +41,8 @@ case $key in
     shift
     shift
     ;;
-    --client-id)
-    client_id="$2"
-    shift
-    shift
-    ;;
-    --client-secret)
-    client_secret="$2"
+    --slack-api-url)
+    slack_api_url="$2"
     shift
     shift
     ;;
@@ -65,11 +59,10 @@ esac
 done
 
 namespace=${namespace:-pulsar}
-secret_name="grafana-github-secret"
+secret_name="alertmanager-secret"
 
-function generate_grafana_github_secret() {
+function generate_alertmanager_secret() {
     kubectl create secret generic ${secret_name} -n ${namespace} \
-        --from-literal="GF_AUTH_GITHUB_CLIENT_ID=${client_id}" \
-        --from-literal="GF_AUTH_GITHUB_CLIENT_SECRET=${client_secret}"
+        --from-literal="SLACK_API_URL=${slack_api_url}"
 }
-generate_grafana_github_secret
+generate_alertmanager_secret

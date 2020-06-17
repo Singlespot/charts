@@ -55,8 +55,50 @@ spec:
 {{ toYaml .Values.alert_manager.tolerations | indent 8 }}
      {{- end }}
       terminationGracePeriodSeconds: {{ .Values.alert_manager.gracePeriod }}
+      initContainers:
+      - name: config
+        image: "{{ .Values.alert_manager.init.image.repository }}:{{ .Values.alert_manager.init.image.tag }}"
+        imagePullPolicy: {{ .Values.alert_manager.init.image.pullPolicy }}
+        command: ['sh', '-c']
+        args:
+          - >
+            for file in $(ls -A /tmpl/ | grep tmpl); do
+              newfile=${file%".tmpl"};
+              envsubst < /tmpl/$file > /etc/config/$newfile;
+            done
+        volumeMounts:
+          - name: tmpl-volume
+            mountPath: /tmpl
+            readOnly: true
+          - name: config-volume
+            mountPath: /etc/config
+        envFrom:
+        - secretRef:
+            name: {{ .Values.alert_manager.init.envFromSecret }}
       containers:
       {{- if .Values.configmapReload.alertmanager.enabled }}
+      - name: {{ template "pulsar.fullname" . }}-{{ .Values.alert_manager.component }}-{{ .Values.alert_manager.config_reloader.name }}
+        image: "{{ .Values.alert_manager.config_reloader.image.repository }}:{{ .Values.alert_manager.config_reloader.image.tag }}"
+        imagePullPolicy: "{{ .Values.alert_manager.config_reloader.image.pullPolicy }}"
+        command: ["bash", "-c"]
+        args:
+          - >
+            inotifywait -m -r -e delete --format '%f' /tmpl/ |
+            while read file; do
+              if [[ "$file" =~ .*tmpl$ ]]; then
+                sleep 1;
+                newfile=${file%".tmpl"};
+                envsubst < /tmpl/$file > /etc/config/$newfile;
+              fi
+            done
+        resources:
+{{ toYaml .Values.configmapReload.alertmanager.resources | indent 12 }}
+        volumeMounts:
+          - name: tmpl-volume
+            mountPath: /tmpl
+            readOnly: true
+          - name: config-volume
+            mountPath: /etc/config
       - name: {{ template "pulsar.fullname" . }}-{{ .Values.alert_manager.component }}-{{ .Values.configmapReload.alertmanager.name }}
         image: "{{ .Values.configmapReload.alertmanager.image.repository }}:{{ .Values.configmapReload.alertmanager.image.tag }}"
         imagePullPolicy: "{{ .Values.configmapReload.alertmanager.image.pullPolicy }}"
@@ -106,7 +148,9 @@ spec:
         - name: config-volume
           mountPath: /etc/config
       volumes:
-      - name: config-volume
+      - name: tmpl-volume
         configMap:
           name: "{{ template "pulsar.fullname" . }}-{{ .Values.alert_manager.component }}"
+      - name: config-volume
+        emptyDir: {}
 {{- end }}

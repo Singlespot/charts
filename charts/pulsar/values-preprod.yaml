@@ -675,8 +675,8 @@ autorecovery:
   gracePeriod: 30
   resources:
     requests:
-      memory: 64Mi
-      cpu: 0.05
+      memory: 128Mi
+      cpu: 0.1
   extraInitContainers: {}
   ## Bookkeeper auto-recovery configmap
   ## templates/autorecovery-configmap.yaml
@@ -1314,6 +1314,19 @@ alert_manager:
       initialDelaySeconds: 30
       periodSeconds: 10
   # alert manager config
+  init:
+    envFromSecret: alertmanager-secret
+    image:
+      repository: dibi/envsubst
+      tag: 1
+      pullPolicy: IfNotPresent
+  config_reloader:
+    name: config-reloader
+    image:
+      repository: shurshun/inotify-tools
+      tag: latest
+      pullPolicy: IfNotPresent
+    resources: {}
   config:
     global:
       resolve_timeout: 1m
@@ -1326,6 +1339,7 @@ alert_manager:
         pagerduty_configs:
         - service_key: "[PAGER DUTRY SERVICE KEY]"
           send_resolved: true
+  extraConfigFiles:
   # add alert rules below
   rules:
     groups:
