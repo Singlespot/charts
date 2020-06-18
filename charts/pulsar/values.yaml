@@ -163,15 +163,11 @@ images:
     pullPolicy: IfNotPresent
   prometheus:
     repository: prom/prometheus
-    tag: v2.18.1
+    tag: v2.19.0
     pullPolicy: IfNotPresent
   alert_manager:
     repository: prom/alertmanager
     tag: v0.20.0
-    pullPolicy: IfNotPresent
-  grafana:
-    repository: 268324876595.dkr.ecr.eu-west-1.amazonaws.com/apache-pulsar-grafana-dashboard-k8s
-    tag: 0.0.8
     pullPolicy: IfNotPresent
   pulsar_manager:
     repository: streamnative/pulsar-manager
@@ -442,6 +438,9 @@ zookeeper:
   tolerations: []
   gracePeriod: 30
   resources:
+    limits:
+      memory: 256Mi
+      cpu: 0.1
     requests:
       memory: 256Mi
       cpu: 0.1
@@ -532,9 +531,12 @@ bookkeeper:
     ## Set the resources used for running `bin/bookkeeper shell initnewcluster`
     ##
     resources:
-      # requests:
-        # memory: 4Gi
-        # cpu: 2
+      limits:
+        memory: 4Gi
+        cpu: 2
+      requests:
+        memory: 4Gi
+        cpu: 2
   replicaCount: 4
   ports:
     http: 8000
@@ -564,6 +566,9 @@ bookkeeper:
   tolerations: []
   gracePeriod: 30
   resources:
+    limits:
+      memory: 512Mi
+      cpu: 0.2
     requests:
       memory: 512Mi
       cpu: 0.2
@@ -674,8 +679,11 @@ autorecovery:
   # tolerations: []
   gracePeriod: 30
   resources:
+    limits:
+      memory: 256Mi
+      cpu: 0.1
     requests:
-      memory: 128Mi
+      memory: 256Mi
       cpu: 0.1
   extraInitContainers: {}
   ## Bookkeeper auto-recovery configmap
@@ -752,6 +760,9 @@ broker:
   securityContext: {}
   gracePeriod: 30
   resources:
+    limits:
+      memory: 512Mi
+      cpu: 0.2
     requests:
       memory: 512Mi
       cpu: 0.2
@@ -884,8 +895,11 @@ proxy:
   tolerations: []
   gracePeriod: 30
   resources:
+    limits:
+      memory: 256Mi
+      cpu: 0.2
     requests:
-      memory: 128Mi
+      memory: 256Mi
       cpu: 0.2
   extraInitContainers: {}
   ## Proxy configmap
@@ -948,8 +962,11 @@ toolset:
   tolerations: []
   gracePeriod: 0
   resources:
+    limits:
+      memory: 512Mi
+      cpu: 0.1
     requests:
-      memory: 256Mi
+      memory: 512Mi
       cpu: 0.1
   ## Bastion configmap
   ## templates/bastion-configmap.yaml
@@ -1059,8 +1076,11 @@ prometheus:
   gracePeriod: 0
   port: 9090
   resources:
+    limits:
+      memory: 384Mi
+      cpu: 0.1
     requests:
-      memory: 256Mi
+      memory: 384Mi
       cpu: 0.1
   volumes:
     # use a persistent volume or emptyDir
@@ -1150,6 +1170,9 @@ grafana:
     portName: service
 
   resources:
+    limits:
+      memory: 250Mi
+      cpu: 0.1
     requests:
       memory: 250Mi
       cpu: 0.1
@@ -1295,6 +1318,9 @@ alert_manager:
   replicaCount: 1
   gracePeriod: 0
   resources:
+    limits:
+      memory: 250Mi
+      cpu: 0.1
     requests:
       memory: 250Mi
       cpu: 0.1
@@ -1821,9 +1847,12 @@ pulsar_manager:
   tolerations: []
   gracePeriod: 0
   resources:
+    limits:
+      memory: 1024Mi
+      cpu: 0.25
     requests:
-      memory: 250Mi
-      cpu: 0.1
+      memory: 1024Mi
+      cpu: 0.25
   volumes:
     # use a persistent volume or emptyDir
     persistence: true
@@ -1891,6 +1920,9 @@ presto:
     ports:
       http: 8081
     resources:
+      limits:
+        memory: 4Gi
+        cpu: 2
       requests:
         memory: 4Gi
         cpu: 2
@@ -1934,6 +1966,9 @@ presto:
     ports:
       http: 8081
     resources:
+      limits:
+        memory: 4Gi
+        cpu: 2
       requests:
         memory: 4Gi
         cpu: 2
