@@ -439,11 +439,11 @@ zookeeper:
   gracePeriod: 30
   resources:
     limits:
-      memory: 256Mi
-      cpu: 0.1
+      memory: 384Mi
+      cpu: 0.25
     requests:
-      memory: 256Mi
-      cpu: 0.1
+      memory: 384Mi
+      cpu: 0.25
   volumes:
     # use a persistent volume or emptyDir
     persistence: true
@@ -567,11 +567,11 @@ bookkeeper:
   gracePeriod: 30
   resources:
     limits:
-      memory: 512Mi
-      cpu: 0.2
+      memory: 768Mi
+      cpu: 0.5
     requests:
-      memory: 512Mi
-      cpu: 0.2
+      memory: 768Mi
+      cpu: 0.5
   volumes:
     # use a persistent volume or emptyDir
     persistence: true
@@ -681,10 +681,10 @@ autorecovery:
   resources:
     limits:
       memory: 256Mi
-      cpu: 0.1
+      cpu: 0.25
     requests:
       memory: 256Mi
-      cpu: 0.1
+      cpu: 0.25
   extraInitContainers: {}
   ## Bookkeeper auto-recovery configmap
   ## templates/autorecovery-configmap.yaml
@@ -762,10 +762,10 @@ broker:
   resources:
     limits:
       memory: 512Mi
-      cpu: 0.2
+      cpu: 0.5
     requests:
       memory: 512Mi
-      cpu: 0.2
+      cpu: 0.5
   extraInitContainers: {}
   ## Broker configmap
   ## templates/broker-configmap.yaml
@@ -897,10 +897,10 @@ proxy:
   resources:
     limits:
       memory: 256Mi
-      cpu: 0.2
+      cpu: 0.5
     requests:
       memory: 256Mi
-      cpu: 0.2
+      cpu: 0.5
   extraInitContainers: {}
   ## Proxy configmap
   ## templates/proxy-configmap.yaml
@@ -964,10 +964,10 @@ toolset:
   resources:
     limits:
       memory: 512Mi
-      cpu: 0.1
+      cpu: 0.25
     requests:
       memory: 512Mi
-      cpu: 0.1
+      cpu: 0.25
   ## Bastion configmap
   ## templates/bastion-configmap.yaml
   ##
@@ -1077,11 +1077,11 @@ prometheus:
   port: 9090
   resources:
     limits:
-      memory: 384Mi
-      cpu: 0.1
+      memory: 512Mi
+      cpu: 0.25
     requests:
-      memory: 384Mi
-      cpu: 0.1
+      memory: 512Mi
+      cpu: 0.25
   volumes:
     # use a persistent volume or emptyDir
     persistence: true
@@ -1171,11 +1171,11 @@ grafana:
 
   resources:
     limits:
-      memory: 250Mi
-      cpu: 0.1
+      memory: 256Mi
+      cpu: 0.25
     requests:
-      memory: 250Mi
-      cpu: 0.1
+      memory: 256Mi
+      cpu: 0.25
 
   ## Enable persistence using Persistent Volume Claims
   ## ref: http://kubernetes.io/docs/user-guide/persistent-volumes/
@@ -1254,10 +1254,10 @@ grafana:
     resources:
       limits:
         cpu: 100m
-        memory: 100Mi
+        memory: 128Mi
       requests:
         cpu: 100m
-        memory: 100Mi
+        memory: 128Mi
     # skipTlsVerify Set to true to skip tls verification for kube api calls
     # skipTlsVerify: true
     dashboards:
@@ -1306,10 +1306,10 @@ node_exporter:
   annotations: {}
   limits:
     cpu: 10m
-    memory: 50Mi
+    memory: 64Mi
   requests:
     cpu: 10m
-    memory: 50Mi
+    memory: 64Mi
 
 alert_manager:
   component: alert-manager
@@ -1319,10 +1319,10 @@ alert_manager:
   gracePeriod: 0
   resources:
     limits:
-      memory: 250Mi
+      memory: 256Mi
       cpu: 0.1
     requests:
-      memory: 250Mi
+      memory: 256Mi
       cpu: 0.1
   service:
     spec:
