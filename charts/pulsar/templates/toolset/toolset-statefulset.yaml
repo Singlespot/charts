@@ -68,19 +68,47 @@ spec:
       {{- end }}
         command: ["sh", "-c"]
         args:
-        - >
+        - |
           bin/apply-config-from-env.py conf/client.conf;
           bin/apply-config-from-env.py conf/bookkeeper.conf;
           {{- include "pulsar.toolset.zookeeper.tls.settings" . | nindent 10 }}
           {{- if .Values.createTopics }}
           {{- range .Values.tenants }}
-          { { bin/pulsar-admin tenants get {{ .name }} && echo "Tenant {{ .name }} exists"; } || { bin/pulsar-admin tenants create {{ .name }} -c {{ template "pulsar.fullname" $ }} && echo "Tenant {{ .name }} created"; }; } &&
+          if bin/pulsar-admin tenants get {{ .name }}; then
+            echo "Tenant {{ .name }} exists";
+          else
+            if bin/pulsar-admin tenants create {{ .name }} -c {{ template "pulsar.fullname" $ }}; then
+              echo "Tenant {{ .name }} created";
+            else
+              exit 1;
+            fi
+          fi
           {{- end }}
           {{- range .Values.namespaces }}
-          { { bin/pulsar-admin namespaces topics {{ .tenant }}/{{ .name }} && echo "Namespace {{ .tenant }}/{{ .name }} exists"; } || { bin/pulsar-admin namespaces create {{ .tenant }}/{{ .name }} -c {{ template "pulsar.fullname" $ }} && echo "Namespace {{ .tenant }}/{{ .name }} created"; }; } &&
+          if bin/pulsar-admin namespaces topics {{ .tenant }}/{{ .name }}; then
+            echo "Namespace {{ .tenant }}/{{ .name }} exists";
+          else
+            if bin/pulsar-admin namespaces create {{ .tenant }}/{{ .name }} -c {{ template "pulsar.fullname" $ }}; then
+              echo "Namespace {{ .tenant }}/{{ .name }} created";
+            else
+              exit 1;
+            fi
+          fi
           {{- end }}
           {{- range .Values.partitionedTopics }}
-          { { bin/pulsar-admin persistent partitioned-stats {{ .fullName }} && echo "Partitioned topic {{ .fullName }} exists"; } || { bin/pulsar-admin persistent create-partitioned-topic {{ .fullName }} --partitions {{ tpl .partitions $ }} && echo "Partitioned topic {{ .fullName }} created"; }; } &&
+          if bin/pulsar-admin persistent partitioned-stats {{ .fullName }}; then
+            echo "Partitioned topic {{ .fullName }} exists";
+          else
+            if bin/pulsar-admin topics stats {{ .fullName }}; then
+              bin/pulsar-admin topics delete --force {{ .fullName }};
+            fi
+            if bin/pulsar-admin persistent create-partitioned-topic {{ .fullName }} --partitions {{ tpl .partitions $ }}; then
+              echo "Partitioned topic {{ .fullName }} created";
+            else
+              exit 1;
+            fi
+          fi
+          echo "Configuration finished";
           {{- end }}
           {{- end }}
           sleep 10000000000
