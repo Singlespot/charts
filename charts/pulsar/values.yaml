@@ -1077,10 +1077,10 @@ prometheus:
   port: 9090
   resources:
     limits:
-      memory: 512Mi
+      memory: 768Mi
       cpu: 0.25
     requests:
-      memory: 512Mi
+      memory: 768Mi
       cpu: 0.25
   volumes:
     # use a persistent volume or emptyDir
