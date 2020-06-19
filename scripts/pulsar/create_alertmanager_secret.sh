@@ -25,8 +25,9 @@ Options:
        -h,--help                        prints the usage message
        -n,--namespace                   the k8s namespace to install the pulsar helm chart
        --slack-api-url                  Slack API url
+       --slack-channel                  Slack channel
 Usage:
-    $0 --namespace pulsar --slack-api-url <slack_api_url>
+    $0 --namespace pulsar --slack-api-url <slack_api_url> --slack-channel <slack_channel>
 EOF
 }
 
@@ -43,6 +44,11 @@ case $key in
     ;;
     --slack-api-url)
     slack_api_url="$2"
+    shift
+    shift
+    ;;
+    --slack-channel)
+    slack_channel="$2"
     shift
     shift
     ;;
@@ -63,6 +69,8 @@ secret_name="alertmanager-secret"
 
 function generate_alertmanager_secret() {
     kubectl create secret generic ${secret_name} -n ${namespace} \
-        --from-literal="SLACK_API_URL=${slack_api_url}"
+      --from-literal="SLACK_API_URL=${slack_api_url}" \
+      --from-literal="SLACK_CHANNEL=${slack_channel}" \
+      --dry-run=client -o yaml | kubectl -n ${namespace} apply -f -
 }
 generate_alertmanager_secret

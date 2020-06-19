@@ -73,8 +73,8 @@ spec:
           - name: config-volume
             mountPath: /etc/config
         envFrom:
-        - secretRef:
-            name: {{ .Values.alert_manager.init.envFromSecret }}
+          - secretRef:
+              name: {{ .Values.alert_manager.init.envFromSecret }}
       containers:
       {{- if .Values.configmapReload.alertmanager.enabled }}
       - name: {{ template "pulsar.fullname" . }}-{{ .Values.alert_manager.component }}-{{ .Values.alert_manager.config_reloader.name }}
@@ -99,6 +99,9 @@ spec:
             readOnly: true
           - name: config-volume
             mountPath: /etc/config
+        envFrom:
+          - secretRef:
+              name: {{ .Values.alert_manager.init.envFromSecret }}
       - name: {{ template "pulsar.fullname" . }}-{{ .Values.alert_manager.component }}-{{ .Values.configmapReload.alertmanager.name }}
         image: "{{ .Values.configmapReload.alertmanager.image.repository }}:{{ .Values.configmapReload.alertmanager.image.tag }}"
         imagePullPolicy: "{{ .Values.configmapReload.alertmanager.image.pullPolicy }}"
