@@ -9,6 +9,10 @@ Define the pulsar zookeeper
 Define the pulsar zookeeper
 */}}
 {{- define "pulsar.zookeeper.connect" -}}
+{{$zk:=.Values.pulsar_metadata.userProvidedZookeepers}}
+{{- if and (not .Values.components.zookeeper) $zk }}
+{{- $zk -}}
+{{ else }}
 {{- if not (and .Values.tls.enabled .Values.tls.zookeeper.enabled) -}}
 {{ template "pulsar.zookeeper.service" . }}:{{ .Values.zookeeper.ports.client }}
 {{- end -}}
@@ -16,12 +20,13 @@ Define the pulsar zookeeper
 {{ template "pulsar.zookeeper.service" . }}:{{ .Values.zookeeper.ports.clientTls }}
 {{- end -}}
 {{- end -}}
+{{- end -}}
 
 {{/*
 Define the zookeeper hostname
 */}}
 {{- define "pulsar.zookeeper.hostname" -}}
-${HOSTNAME}.{{ template "pulsar.zookeeper.service" . }}.{{ .Values.namespace }}.svc.cluster.local
+${HOSTNAME}.{{ template "pulsar.zookeeper.service" . }}.{{ template "pulsar.namespace" . }}.svc.cluster.local
 {{- end -}}
 
 {{/*
@@ -185,11 +190,14 @@ Define zookeeper data volumes
     resources:
       requests:
         storage: {{ .Values.zookeeper.volumes.data.size }}
-  {{- if and (not (and .Values.volumes.local_storage .Values.zookeeper.volumes.data.local_storage)) .Values.zookeeper.volumes.data.storageClass }}
-    storageClassName: "{{ template "pulsar.fullname" . }}-{{ .Values.zookeeper.component }}-{{ .Values.zookeeper.volumes.data.name }}"
-  {{- end }}
   {{- if and .Values.volumes.local_storage .Values.zookeeper.volumes.data.local_storage }}
     storageClassName: "local-storage"
+  {{- else }}
+    {{- if  .Values.zookeeper.volumes.data.storageClass }}
+    storageClassName: "{{ template "pulsar.fullname" . }}-{{ .Values.zookeeper.component }}-{{ .Values.zookeeper.volumes.data.name }}"
+    {{- else if .Values.zookeeper.volumes.data.storageClassName }}
+    storageClassName: {{ .Values.zookeeper.volumes.data.storageClassName }}
+    {{- end -}}
   {{- end }}
 {{- if .Values.zookeeper.volumes.useSeparateDiskForTxlog }}
 - metadata:
@@ -199,12 +207,34 @@ Define zookeeper data volumes
     resources:
       requests:
         storage: {{ .Values.zookeeper.volumes.dataLog.size }}
-  {{- if and (not (and .Values.volumes.local_storage .Values.zookeeper.volumes.dataLog.local_storage)) .Values.zookeeper.volumes.dataLog.storageClass }}
-    storageClassName: "{{ template "pulsar.fullname" . }}-{{ .Values.zookeeper.component }}-{{ .Values.zookeeper.volumes.dataLog.name }}"
-  {{- end }}
-  {{- if and .Values.volumes.local_storage .Values.zookeeper.volumes.dataLog.local_storage }}
+  {{- if and .Values.volumes.local_storage .Values.zookeeper.volumes.data.local_storage }}
     storageClassName: "local-storage"
+  {{- else }}
+    {{- if  .Values.zookeeper.volumes.dataLog.storageClass }}
+    storageClassName: "{{ template "pulsar.fullname" . }}-{{ .Values.zookeeper.component }}-{{ .Values.zookeeper.volumes.dataLog.name }}"
+    {{- else if .Values.zookeeper.volumes.dataLog.storageClassName }}
+    storageClassName: {{ .Values.zookeeper.volumes.dataLog.storageClassName }}
+    {{- end -}}
   {{- end }}
 {{- end }}
 {{- end }}
+{{- end }}
+
+{{/*
+Define zookeeper gen-zk-conf volume mounts
+*/}}
+{{- define "pulsar.zookeeper.genzkconf.volumeMounts" -}}
+- name: "{{ template "pulsar.fullname" . }}-{{ .Values.zookeeper.component }}-genzkconf"
+  mountPath: "{{ template "pulsar.home" . }}/bin/gen-zk-conf.sh"
+  subPath: gen-zk-conf.sh
+{{- end }}
+
+{{/*
+Define zookeeper gen-zk-conf volumes
+*/}}
+{{- define "pulsar.zookeeper.genzkconf.volumes" -}}
+- name: "{{ template "pulsar.fullname" . }}-{{ .Values.zookeeper.component }}-genzkconf"
+  configMap:
+    name: "{{ template "pulsar.fullname" . }}-genzkconf-configmap"
+    defaultMode: 0755
 {{- end }}

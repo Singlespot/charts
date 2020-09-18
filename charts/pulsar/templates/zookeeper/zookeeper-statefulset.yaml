@@ -68,7 +68,8 @@ spec:
       affinity:
         {{- if and .Values.affinity.anti_affinity .Values.zookeeper.affinity.anti_affinity}}
         podAntiAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
+          {{ .Values.zookeeper.affinity.type }}:
+          {{ if eq .Values.zookeeper.affinity.type "requiredDuringSchedulingIgnoredDuringExecution"}}
           - labelSelector:
               matchExpressions:
               - key: "app"
@@ -84,6 +85,25 @@ spec:
                 values:
                 - {{ .Values.zookeeper.component }}
             topologyKey: "kubernetes.io/hostname"
+          {{ else }}
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: "app"
+                      operator: In
+                      values:
+                      - "{{ template "pulsar.name" . }}"
+                    - key: "release"
+                      operator: In
+                      values:
+                      - {{ .Release.Name }}
+                    - key: "component" 
+                      operator: In
+                      values:
+                      - {{ .Values.zookeeper.component }}
+                topologyKey: "kubernetes.io/hostname"
+          {{ end }}
         {{- end }}
       terminationGracePeriodSeconds: {{ .Values.zookeeper.gracePeriod }}
       initContainers:
@@ -102,13 +122,15 @@ spec:
 {{ toYaml .Values.zookeeper.resources | indent 10 }}
       {{- end }}
         command: ["sh", "-c"]
-        # PULSAR_EXTRA_OPTS="${PULSAR_EXTRA_OPTS} -Dzookeeper.serverCnxnFactory=org.apache.zookeeper.server.NettyServerCnxnFactory -Dzookeeper.ssl.keyStore.location=/pulsar/certs/zookeeper/tls.key -Dzookeeper.ssl.trustStore.location=/pulsar/certs/ca/ca.crt"
         args:
         - >
           bin/apply-config-from-env.py conf/zookeeper.conf;
-          bin/apply-config-from-env.py conf/pulsar_env.sh;
           {{- include "pulsar.zookeeper.tls.settings" . | nindent 10 }}
-          bin/generate-zookeeper-config.sh conf/zookeeper.conf;
+          {{- range $server := .Values.zookeeper.reconfig.zkServers }}
+          echo "{{ $server }}" >> conf/zookeeper.conf;
+          {{- end }}
+          bin/gen-zk-conf.sh conf/zookeeper.conf {{ .Values.zookeeper.initialMyId }} {{ .Values.zookeeper.peerType }};
+          cat conf/zookeeper.conf;
           bin/pulsar zookeeper;
         ports:
         - name: metrics
@@ -162,10 +184,12 @@ spec:
         {{- include "pulsar.zookeeper.data.volumeMounts" . | nindent 8 }}
         {{- include "pulsar.zookeeper.certs.volumeMounts" . | nindent 8 }}
         {{- include "pulsar.zookeeper.log.volumeMounts" . | nindent 8 }}
+        {{- include "pulsar.zookeeper.genzkconf.volumeMounts" . | nindent 8 }}
       volumes:
       {{- include "pulsar.zookeeper.data.volumes" . | nindent 6 }}
       {{- include "pulsar.zookeeper.certs.volumes" . | nindent 6 }}
       {{- include "pulsar.zookeeper.log.volumes" . | nindent 6 }}
+      {{- include "pulsar.zookeeper.genzkconf.volumes" . | nindent 6 }}
   volumeClaimTemplates:
   {{- include "pulsar.zookeeper.data.volumeClaimTemplates" . | nindent 2 }}
 {{- end }}

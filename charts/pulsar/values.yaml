@@ -163,7 +163,7 @@ images:
     pullPolicy: IfNotPresent
   prometheus:
     repository: prom/prometheus
-    tag: v2.19.0
+    tag: v2.21.0
     pullPolicy: IfNotPresent
   alert_manager:
     repository: prom/alertmanager
@@ -250,6 +250,8 @@ auth:
     proxy: "proxy-admin"
     # pulsar-admin client to broker/proxy communication
     client: "admin"
+    # pulsar-manager to broker/proxy communication
+    pulsar_manager: "pulsar-manager-admin"
   # Enable vault based authentication
   vault:
     enabled: false
@@ -286,7 +288,6 @@ certs:
         clouddns:
           # TODO: add a link about how to configure this section
           project: "[YOUR GCP PROJECT ID]"
-          accessKeyID: [accessKeyID of the user who is able to manage the external DNS]
           serviceAccountSecretRef:
             name: "[NAME OF SECRET]"
             key: "[KEY OF SECRET]"
@@ -324,6 +325,11 @@ external_dns:
     annotations: {}
   securityContext: {}
 
+## Domain requested from External DNS
+domain:
+  enabled: false
+  suffix: test.pulsar.example.local
+
 ## Ingresses for exposing Pulsar services
 ingress:
   ## templates/proxy-service-ingress.yaml
@@ -333,6 +339,14 @@ ingress:
     enabled: false
     tls:
       enabled: true
+    type: LoadBalancer
+    annotations: {}
+    extraSpec: {}
+  ## templates/broker-service-ingress.yaml
+  ##
+  ## Ingresses for exposing pulsar service publicly
+  broker:
+    enabled: false
     type: LoadBalancer
     annotations: {}
     extraSpec: {}
@@ -431,6 +445,10 @@ zookeeper:
       periodSeconds: 30
   affinity:
     anti_affinity: true
+    # Set the anti affinity type. Valid values:
+    # requiredDuringSchedulingIgnoredDuringExecution - rules must be met for pod to be scheduled (hard) requires at least one node per replica
+    # preferredDuringSchedulingIgnoredDuringExecution - scheduler will try to enforce but not guranentee
+    type: preferredDuringSchedulingIgnoredDuringExecution
   annotations:
     prometheus.io/scrape: "true"
     prometheus.io/port: "8000"
@@ -455,28 +473,52 @@ zookeeper:
       name: data
       size: 50Gi
       local_storage: true
+      # storageClassName: ""
       ## If the storage class is left undefined when using persistence
       ## the default storage class for the cluster will be used.
       ##
       # storageClass:
-        # type: pd-ssd
-        # fsType: xfs
-        # provisioner: kubernetes.io/gce-pd
+      #   type: pd-ssd
+      #   fsType: xfs
+      #   provisioner: kubernetes.io/gce-pd
+      #   allowVolumeExpansion: false
+      #   volumeBindingMode: Immediate
+      #   reclaimPolicy: Retain
+      #   allowedTopologies:
+      #   mountOptions:
+      #   extraParameters:
+      #     iopsPerGB: "50"
     dataLog:
       name: datalog
       size: 10Gi
       local_storage: true
+      # storageClassName: ""
       ## If the storage class is left undefined when using persistence
       ## the default storage class for the cluster will be used.
       ##
       # storageClass:
-        # type: pd-ssd
-        # fsType: xfs
-        # provisioner: kubernetes.io/gce-pd
+      #   type: pd-ssd
+      #   fsType: xfs
+      #   provisioner: kubernetes.io/gce-pd
+      #   allowVolumeExpansion: false
+      #   volumeBindingMode: Immediate
+      #   reclaimPolicy: Retain
+      #   allowedTopologies:
+      #   mountOptions:
+      #   extraParameters:
+      #     iopsPerGB: "50"
   extraInitContainers: {}
   ## Zookeeper configmap
   ## templates/zookeeper-configmap.yaml
   ##
+  # The initial myid used for generating myid for each zookeeper pod.
+  initialMyId: 0
+  peerType: "participant"
+  # reconfig settings
+  reconfig:
+    enabled: false
+    # The zookeeper servers to observe/join
+    zkServers: []
   # Automtically Roll Deployments when configmap is changed
   autoRollDeployment: true
   configData:
@@ -557,6 +599,10 @@ bookkeeper:
       periodSeconds: 30
   affinity:
     anti_affinity: true
+    # Set the anti affinity type. Valid values:
+    # requiredDuringSchedulingIgnoredDuringExecution - rules must be met for pod to be scheduled (hard) requires at least one node per replica
+    # preferredDuringSchedulingIgnoredDuringExecution - scheduler will try to enforce but not guranentee
+    type: preferredDuringSchedulingIgnoredDuringExecution
   annotations: {}
   securityContext: {}
   tolerations: []
@@ -575,19 +621,26 @@ bookkeeper:
       name: journal
       size: 10Gi
       local_storage: true
+      # storageClassName: ""
       ## If the storage class is left undefined when using persistence
       ## the default storage class for the cluster will be used.
       ##
       # storageClass:
-        # type: pd-ssd
-        # fsType: xfs
-        # provisioner: kubernetes.io/gce-pd
-        # extraParameters:
-        #   iopsPerGB: "50"
+      #   type: pd-ssd
+      #   fsType: xfs
+      #   provisioner: kubernetes.io/gce-pd
+      #   allowVolumeExpansion: false
+      #   volumeBindingMode: Immediate
+      #   reclaimPolicy: Retain
+      #   allowedTopologies:
+      #   mountOptions:
+      #   extraParameters:
+      #     iopsPerGB: "50"
     ledgers:
       name: ledgers
       size: 50Gi
       local_storage: true
+      # storageClassName: ""
       ## If the storage class is left undefined when using persistence
       ## the default storage class for the cluster will be used.
       ##
@@ -595,6 +648,11 @@ bookkeeper:
         # type: pd-ssd
         # fsType: xfs
         # provisioner: kubernetes.io/gce-pd
+        # allowVolumeExpansion: false
+        # volumeBindingMode: Immediate
+        # reclaimPolicy: Retain
+        # allowedTopologies:
+        # mountOptions:
         # extraParameters:
         #   iopsPerGB: "50"
   extraInitContainers: {}
@@ -664,6 +722,10 @@ autorecovery:
     # cloud.google.com/gke-nodepool: default-pool
   affinity:
     anti_affinity: true
+    # Set the anti affinity type. Valid values:
+    # requiredDuringSchedulingIgnoredDuringExecution - rules must be met for pod to be scheduled (hard) requires at least one node per replica
+    # preferredDuringSchedulingIgnoredDuringExecution - scheduler will try to enforce but not guranentee
+    type: preferredDuringSchedulingIgnoredDuringExecution
   annotations: {}
   securityContext: {}
   # tolerations: []
@@ -704,6 +766,15 @@ pulsar_metadata:
   # configurationStore:
   configurationStoreMetadataPrefix: ""
 
+  ## optional, you can provide your own zookeeper metadata store for other components
+  # to use this, you should explicit set components.zookeeper to false
+  #
+  # userProvidedZookeepers: "zk01.example.com:2181,zk02.example.com:2181"
+
+  # set the cluster name. if empty or not specified,
+  # it will use helm release name to generate a cluster name.
+  clusterName: ""
+
 ## Pulsar: KoP Protocol Handler
 kop:
   ports:
@@ -743,10 +814,16 @@ broker:
       periodSeconds: 10
   affinity:
     anti_affinity: true
+    # Set the anti affinity type. Valid values:
+    # requiredDuringSchedulingIgnoredDuringExecution - rules must be met for pod to be scheduled (hard) requires at least one node per replica
+    # preferredDuringSchedulingIgnoredDuringExecution - scheduler will try to enforce but not guranentee
+    type: preferredDuringSchedulingIgnoredDuringExecution
   annotations: {}
   tolerations: []
   securityContext: {}
   gracePeriod: 30
+  # flag to advertise pod ip address
+  advertisedPodIP: false
   resources:
     limits:
       memory: 512Mi
@@ -795,11 +872,13 @@ broker:
   pdb:
     usePolicy: true
     maxUnavailable: 1
+  ### Broker service account
+  ## templates/broker-service-account.yaml
+  service_account:
+    annotations: {}
   offload:
     enabled: false
     managedLedgerOffloadDriver: aws-s3
-    managedLedgerMinLedgerRolloverTimeMinutes: "1"
-    managedLedgerMaxEntriesPerLedger: "5000"
     gcs:
       enabled: false
       gcsManagedLedgerOffloadRegion: "[YOUR REGION OF GCS]"
@@ -821,7 +900,33 @@ functions:
   enableCustomizerRuntime: false
   runtimeCustomizerClassName: "org.apache.pulsar.functions.runtime.kubernetes.BasicKubernetesManifestCustomizer"
   pulsarExtraClasspath: "extraLibs"
-
+  # Specify the namespace to run pulsar functions
+  jobNamespace: ""
+  # Specify the pulsar root directory
+  pulsarRootDir: ""
+  configData:
+    downloadDirectory: download/pulsar_functions
+    pulsarFunctionsNamespace: public/functions
+    functionMetadataTopicName: metadata
+    clusterCoordinationTopicName: coordinate
+    numHttpServerThreads: 8
+    schedulerClassName: "org.apache.pulsar.functions.worker.scheduler.RoundRobinScheduler"
+    functionAssignmentTopicName: "assignments"
+    failureCheckFreqMs: 30000
+    rescheduleTimeoutMs: 60000
+    initialBrokerReconnectMaxRetries: 60
+    assignmentWriteMaxRetries: 60
+    instanceLivenessCheckFreqMs: 30000
+    # Frequency how often worker performs compaction on function-topics
+    topicCompactionFrequencySec: 1800
+    # kubernetes runtime
+    functionRuntimeFactoryClassName: org.apache.pulsar.functions.runtime.kubernetes.KubernetesRuntimeFactory
+    # Connectors
+    connectorsDirectory: ./connectors
+    functionsDirectory: ./functions
+    narExtractionDirectory: ""
+  functionRuntimeFactoryConfigs:
+    pulsarRootDir: /pulsar
 
 ## Pulsar: pulsar detector
 ## templates/pulsar-detector-statefulset.yaml
@@ -874,6 +979,10 @@ proxy:
       periodSeconds: 10
   affinity:
     anti_affinity: true
+    # Set the anti affinity type. Valid values:
+    # requiredDuringSchedulingIgnoredDuringExecution - rules must be met for pod to be scheduled (hard) requires at least one node per replica
+    # preferredDuringSchedulingIgnoredDuringExecution - scheduler will try to enforce but not guranentee
+    type: preferredDuringSchedulingIgnoredDuringExecution
   annotations: {}
   securityContext: {}
   tolerations: []
@@ -891,6 +1000,11 @@ proxy:
   ##
   # Automtically Roll Deployments when configmap is changed
   autoRollDeployment: true
+  # Config proxy to point to an existing broker clusters
+  brokerServiceURL: ""
+  brokerWebServiceURL: ""
+  brokerServiceURLTLS: ""
+  brokerWebServiceURLTLS: ""
   configData:
     PULSAR_MEM: >
       -Xms64m -Xmx64m -XX:MaxDirectMemorySize=64m
@@ -1049,10 +1163,10 @@ prometheus:
   port: 9090
   resources:
     limits:
-      memory: 384Mi
+      memory: 768Mi
       cpu: 0.25
     requests:
-      memory: 384Mi
+      memory: 768Mi
       cpu: 0.25
   volumes:
     # use a persistent volume or emptyDir
@@ -1061,6 +1175,7 @@ prometheus:
       name: data
       size: 10Gi
       local_storage: true
+      # storageClassName: ""
       ## If the storage class is left undefined when using persistence
       ## the default storage class for the cluster will be used.
       ##
@@ -1832,6 +1947,7 @@ pulsar_manager:
       name: data
       size: 10Gi
       local_storage: true
+      # storageClassName: ""
       ## If the storage class is left undefined when using persistence
       ## the default storage class for the cluster will be used.
       ##
@@ -1887,6 +2003,10 @@ presto:
     tolerations: []
     affinity:
       anti_affinity: true
+      # Set the anti affinity type. Valid values:
+      # requiredDuringSchedulingIgnoredDuringExecution - rules must be met for pod to be scheduled (hard) requires at least one node per replica
+      # preferredDuringSchedulingIgnoredDuringExecution - scheduler will try to enforce but not guranentee
+      type: preferredDuringSchedulingIgnoredDuringExecution
     annotations: {}
     gracePeriod: 10
     ports:
@@ -1933,6 +2053,10 @@ presto:
     tolerations: []
     affinity:
       anti_affinity: true
+      # Set the anti affinity type. Valid values:
+      # requiredDuringSchedulingIgnoredDuringExecution - rules must be met for pod to be scheduled (hard) requires at least one node per replica
+      # preferredDuringSchedulingIgnoredDuringExecution - scheduler will try to enforce but not guranentee
+      type: preferredDuringSchedulingIgnoredDuringExecution
     annotations: {}
     gracePeriod: 10
     ports:

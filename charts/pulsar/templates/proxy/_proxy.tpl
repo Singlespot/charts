@@ -1,4 +1,16 @@
 {{/*
+pulsar service domain
+*/}}
+{{- define "pulsar.service_domain" -}}
+{{- if .Values.domain.enabled -}}
+{{- printf "data.%s.%s" .Release.Name .Values.domain.suffix -}}
+{{- else -}}
+{{- print "" -}}
+{{- end -}}
+{{- end -}}
+
+
+{{/*
 Define proxy token mounts
 */}}
 {{- define "pulsar.proxy.token.volumeMounts" -}}
@@ -177,5 +189,49 @@ pulsar ingress target port for http endpoint
 {{- print "pulsarssl" -}}
 {{- else -}}
 {{- print "pulsar" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Pulsar Broker Service URL
+*/}}
+{{- define "pulsar.proxy.broker.service.url" -}}
+{{- if .Values.proxy.brokerServiceURL -}}
+{{- .Values.proxy.brokerServiceURL -}}
+{{- else -}}
+pulsar://{{ template "pulsar.fullname" . }}-{{ .Values.broker.component }}:{{ .Values.broker.ports.pulsar }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Pulsar Web Service URL
+*/}}
+{{- define "pulsar.proxy.web.service.url" -}}
+{{- if .Values.proxy.brokerWebServiceURL -}}
+{{- .Values.proxy.brokerWebServiceURL -}}
+{{- else -}}
+http://{{ template "pulsar.fullname" . }}-{{ .Values.broker.component }}:{{ .Values.broker.ports.http }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Pulsar Broker Service URL TLS
+*/}}
+{{- define "pulsar.proxy.broker.service.url.tls" -}}
+{{- if .Values.proxy.brokerServiceURLTLS -}}
+{{- .Values.proxy.brokerServiceURLTLS -}}
+{{- else -}}
+pulsar+ssl://{{ template "pulsar.fullname" . }}-{{ .Values.broker.component }}:{{ .Values.broker.ports.pulsarssl }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Pulsar Web Service URL
+*/}}
+{{- define "pulsar.proxy.web.service.url.tls" -}}
+{{- if .Values.proxy.brokerWebServiceURLTLS -}}
+{{- .Values.proxy.brokerWebServiceURLTLS -}}
+{{- else -}}
+https://{{ template "pulsar.fullname" . }}-{{ .Values.broker.component }}:{{ .Values.broker.ports.https }}
 {{- end -}}
 {{- end -}}

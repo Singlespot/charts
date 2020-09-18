@@ -6,10 +6,32 @@ Define the pulsar brroker service
 {{- end }}
 
 {{/*
+Define the service url
+*/}}
+{{- define "pulsar.broker.service.url" -}}
+{{- if and .Values.tls.enabled .Values.tls.broker.enabled -}}
+pulsar+ssl://{{ template "pulsar.broker.service" . }}.{{ template "pulsar.namespace" . }}.svc.cluster.local:{{ .Values.broker.ports.pulsarssl }}
+{{- else -}}
+pulsar://{{ template "pulsar.broker.service" . }}.{{ template "pulsar.namespace" . }}.svc.cluster.local:{{ .Values.broker.ports.pulsar }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Define the web service url
+*/}}
+{{- define "pulsar.web.service.url" -}}
+{{- if and .Values.tls.enabled .Values.tls.broker.enabled -}}
+https://{{ template "pulsar.broker.service" . }}.{{ template "pulsar.namespace" . }}.svc.cluster.local:{{ .Values.broker.ports.https }}
+{{- else -}}
+http://{{ template "pulsar.broker.service" . }}.{{ template "pulsar.namespace" . }}.svc.cluster.local:{{ .Values.broker.ports.http }}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Define the hostname
 */}}
 {{- define "pulsar.broker.hostname" -}}
-${HOSTNAME}.{{ template "pulsar.broker.service" . }}.{{ .Values.namespace }}.svc.cluster.local
+${HOSTNAME}.{{ template "pulsar.broker.service" . }}.{{ template "pulsar.namespace" . }}.svc.cluster.local
 {{- end -}}
 
 {{/*
@@ -160,6 +182,29 @@ Define broker log volumes
   configMap:
     name: "{{ template "pulsar.fullname" . }}-{{ .Values.broker.component }}"
 {{- end }}
+
+{{/*
+Define function worker config volume mount
+*/}}
+{{- define "pulsar.function.worker.config.volumeMounts" -}}
+{{- if .Values.components.functions }}
+- name: "function-worker-config"
+  mountPath: "{{ template "pulsar.home" . }}/conf/functions_worker.yml"
+  subPath: functions_worker.yml
+{{- end }}
+{{- end }}
+
+{{/*
+Define function worker config volume
+*/}}
+{{- define "pulsar.function.worker.config.volumes" -}}
+{{- if .Values.components.functions }}
+- name: "function-worker-config"
+  configMap:
+    name: "{{ template "pulsar.fullname" . }}-{{ .Values.functions.component }}-configfile"
+{{- end }}
+{{- end }}
+
 {{/*Define broker datadog annotation*/}}
 {{- define "pulsar.broker.datadog.annotation" -}}
 {{- if .Values.datadog.components.broker.enabled }}
@@ -277,8 +322,8 @@ Define gcs offload options mounts
 */}}
 {{- define "pulsar.broker.offload.volumeMounts" -}}
 {{- if .Values.broker.offload.gcs.enabled }}
-- name: service-account-key-file
-  mountPath: "/pulsar/keys"
+- name: gcs-offloader-service-acccount
+  mountPath: /pulsar/srvaccts
   readOnly: true
 {{- end }}
 {{- end }}
@@ -288,9 +333,9 @@ Define gcs offload options mounts
 */}}
 {{- define "pulsar.broker.offload.volumes" -}}
 {{- if .Values.broker.offload.gcs.enabled }}
-- name: service-account-key-file
+- name: gcs-offloader-service-acccount
   secret:
-    secretName: "{{ .Release.Name }}-service-account-secret"
+    secretName: "{{ .Release.Name }}-gcs-offloader-service-account"
     items:
       - key: gcs.json
         path: gcs.json
