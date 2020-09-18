@@ -2,21 +2,21 @@ namespace: pulsar-dev
 
 images:
   zookeeper:
-    tag: 2.5.2
+    tag: 2.6.0
   bookie:
-    tag: 2.5.2
+    tag: 2.6.0
   presto:
-    tag: 2.5.2
+    tag: 2.6.0
   autorecovery:
-    tag: 2.5.2
+    tag: 2.6.0
   broker:
-    tag: 2.5.2
+    tag: 2.6.0
   proxy:
-    tag: 2.5.2
+    tag: 2.6.0
   pulsar_detector:
-    tag: 2.5.2
+    tag: 2.6.0
   functions:
-    tag: 2.5.2
+    tag: 2.6.0
 #  prometheus:
 #    tag: v2.18.2
 
@@ -37,7 +37,7 @@ zookeeper:
 bookkeeper:
   metadata:
     image:
-      tag: 2.5.2
+      tag: 2.6.0
 #  resources:
 #    limits:
 #      memory: 512Mi
@@ -62,7 +62,7 @@ bookkeeper:
 
 pulsar_metadata:
   image:
-    tag: 2.5.2
+    tag: 2.6.0
 
 #broker:
 #  resources:
@@ -101,7 +101,7 @@ prometheus:
 #      cpu: 0.1
   volumes:
     data:
-      size: 3Gi
+      size: 10Gi
 
 grafana:
   #    limits:

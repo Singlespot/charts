@@ -439,10 +439,10 @@ zookeeper:
   gracePeriod: 30
   resources:
     limits:
-      memory: 384Mi
+      memory: 512Mi
       cpu: 0.25
     requests:
-      memory: 384Mi
+      memory: 512Mi
       cpu: 0.25
   volumes:
     # use a persistent volume or emptyDir
@@ -670,10 +670,10 @@ autorecovery:
   gracePeriod: 30
   resources:
     limits:
-      memory: 256Mi
+      memory: 384Mi
       cpu: 0.25
     requests:
-      memory: 256Mi
+      memory: 384Mi
       cpu: 0.25
   extraInitContainers: {}
   ## Bookkeeper auto-recovery configmap
@@ -1049,10 +1049,10 @@ prometheus:
   port: 9090
   resources:
     limits:
-      memory: 768Mi
+      memory: 384Mi
       cpu: 0.25
     requests:
-      memory: 768Mi
+      memory: 384Mi
       cpu: 0.25
   volumes:
     # use a persistent volume or emptyDir
@@ -1407,7 +1407,7 @@ alert_manager:
               summary: "Container CPU usage (instance {{ $labels.instance }})"
               description: "Container CPU usage is above 80%\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
           - alert: ContainerMemoryUsage
-            expr: (sum(container_memory_usage_bytes) BY (instance, pod, container) / sum(container_spec_memory_limit_bytes{pod=~".+",container=~".+"} > 0) BY (instance, pod, container) * 100) > 80
+            expr: (sum(container_memory_usage_bytes) BY (instance, pod, container) / sum(container_spec_memory_limit_bytes{pod=~".+",pod!~".+prometheus.+",container=~".+"} > 0) BY (instance, pod, container) * 100) > 80
             for: 5m
             labels:
               severity: warning
