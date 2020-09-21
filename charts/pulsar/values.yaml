@@ -115,49 +115,49 @@ monitoring:
 images:
   zookeeper:
     repository: apachepulsar/pulsar-all
-    tag: 2.3.2
+    tag: 2.6.0
 #    repository: streamnative/platform
 #    tag: v1.0.0
     pullPolicy: IfNotPresent
   bookie:
     repository: apachepulsar/pulsar-all
-    tag: 2.3.2
+    tag: 2.6.0
 #    repository: streamnative/platform
 #    tag: v1.0.0
     pullPolicy: IfNotPresent
   presto:
     repository: apachepulsar/pulsar-all
-    tag: 2.3.2
+    tag: 2.6.0
 #    repository: streamnative/platform
 #    tag: v1.0.0
     pullPolicy: IfNotPresent
   autorecovery:
     repository: apachepulsar/pulsar-all
-    tag: 2.3.2
+    tag: 2.6.0
 #    repository: streamnative/platform
 #    tag: v1.0.0
     pullPolicy: IfNotPresent
   broker:
     repository: apachepulsar/pulsar-all
-    tag: 2.3.2
+    tag: 2.6.0
 #    repository: streamnative/platform-all
 #    tag: v1.0.1
     pullPolicy: IfNotPresent
   proxy:
     repository: apachepulsar/pulsar-all
-    tag: 2.3.2
+    tag: 2.6.0
 #    repository: streamnative/platform
 #    tag: v1.0.0
     pullPolicy: IfNotPresent
   pulsar_detector:
     repository: apachepulsar/pulsar-all
-    tag: 2.3.2
+    tag: 2.6.0
 #    repository: streamnative/sn-pulsar
 #    tag: 2.3.2-1
     pullPolicy: IfNotPresent
   functions:
     repository: apachepulsar/pulsar-all
-    tag: 2.3.2
+    tag: 2.6.0
 #    repository: streamnative/platform
 #    tag: v1.0.0
     pullPolicy: IfNotPresent
@@ -167,7 +167,7 @@ images:
     pullPolicy: IfNotPresent
   alert_manager:
     repository: prom/alertmanager
-    tag: v0.20.0
+    tag: v0.21.0
     pullPolicy: IfNotPresent
   pulsar_manager:
     repository: streamnative/pulsar-manager
@@ -176,11 +176,11 @@ images:
     hasCommand: false
   node_exporter:
     repository: prom/node-exporter
-    tag: v1.0.0
+    tag: v1.0.1
     pullPolicy: "IfNotPresent"
   nginx_ingress_controller:
     repository: quay.io/kubernetes-ingress-controller/nginx-ingress-controller
-    tag: 0.32.0
+    tag: 0.33.0
     pullPolicy: "IfNotPresent"
 
 ## TLS
@@ -472,8 +472,8 @@ zookeeper:
     data:
       name: data
       size: 50Gi
-      local_storage: true
-      # storageClassName: ""
+#      local_storage: true
+      storageClassName: gp2
       ## If the storage class is left undefined when using persistence
       ## the default storage class for the cluster will be used.
       ##
@@ -491,8 +491,8 @@ zookeeper:
     dataLog:
       name: datalog
       size: 10Gi
-      local_storage: true
-      # storageClassName: ""
+#      local_storage: true
+      storageClassName: gp2
       ## If the storage class is left undefined when using persistence
       ## the default storage class for the cluster will be used.
       ##
@@ -559,13 +559,6 @@ bookkeeper:
   ## BookKeeper Cluster Initialize
   ## templates/bookkeeper-cluster-initialize.yaml
   metadata:
-    image:
-      # the image used for running `bookkeeper-cluster-initialize` job
-      repository: apachepulsar/pulsar-all
-      tag: 2.3.2
-      # repository: streamnative/platform
-      # tag: v1.0.0
-      pullPolicy: IfNotPresent
     ## Set the resources used for running `bin/bookkeeper shell initnewcluster`
     ##
     resources:
@@ -620,8 +613,8 @@ bookkeeper:
     journal:
       name: journal
       size: 10Gi
-      local_storage: true
-      # storageClassName: ""
+#      local_storage: true
+      storageClassName: gp2
       ## If the storage class is left undefined when using persistence
       ## the default storage class for the cluster will be used.
       ##
@@ -639,8 +632,8 @@ bookkeeper:
     ledgers:
       name: ledgers
       size: 50Gi
-      local_storage: true
-      # storageClassName: ""
+#      local_storage: true
+      storageClassName: gp2
       ## If the storage class is left undefined when using persistence
       ## the default storage class for the cluster will be used.
       ##
@@ -758,7 +751,7 @@ pulsar_metadata:
   image:
     # the image used for running `pulsar-cluster-initialize` job
     repository: apachepulsar/pulsar-all
-    tag: 2.3.2
+    tag: 2.6.0
     # repository: streamnative/platform
     # tag: v1.0.0
     pullPolicy: IfNotPresent
@@ -1174,8 +1167,8 @@ prometheus:
     data:
       name: data
       size: 10Gi
-      local_storage: true
-      # storageClassName: ""
+#      local_storage: true
+      storageClassName: gp2
       ## If the storage class is left undefined when using persistence
       ## the default storage class for the cluster will be used.
       ##
@@ -1269,7 +1262,7 @@ grafana:
   ##
   persistence:
     enabled: true
-    # storageClassName: default
+    storageClassName: gp2
     size: 10Gi
     finalizers:
       - kubernetes.io/pvc-protection
@@ -1946,8 +1939,8 @@ pulsar_manager:
     data:
       name: data
       size: 10Gi
-      local_storage: true
-      # storageClassName: ""
+#      local_storage: true
+      storageClassName: gp2
       ## If the storage class is left undefined when using persistence
       ## the default storage class for the cluster will be used.
       ##

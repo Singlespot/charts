@@ -128,9 +128,6 @@ do_create_namespace
 echo "create the credentials for the admin user of control center (grafana & pulsar-manager)"
 generate_cc_admin_credentials
 
-echo "create the credentials for the service account key file (offload data to gcs)"
-generate_service_account_credentials
-
 if [[ "${gcs_offloader_enabled}" == "true" ]]; then
     echo "create the credentials for the service account key file (offload data to gcs)"
     generate_gcs_offloader_service_account_keyfile

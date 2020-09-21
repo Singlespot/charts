@@ -1,24 +1,24 @@
 namespace: pulsar-preprod
 
-images:
-  zookeeper:
-    tag: 2.5.2
-  bookie:
-    tag: 2.5.2
-  presto:
-    tag: 2.5.2
-  autorecovery:
-    tag: 2.5.2
-  broker:
-    tag: 2.5.2
-  proxy:
-    tag: 2.5.2
-  pulsar_detector:
-    tag: 2.5.2
-  functions:
-    tag: 2.5.2
-#  prometheus:
-#    tag: v2.18.2
+#images:
+#  zookeeper:
+#    tag: 2.6.0
+#  bookie:
+#    tag: 2.6.0
+#  presto:
+#    tag: 2.6.0
+#  autorecovery:
+#    tag: 2.6.0
+#  broker:
+#    tag: 2.6.0
+#  proxy:
+#    tag: 2.6.0
+#  pulsar_detector:
+#    tag: 2.6.0
+#  functions:
+#    tag: 2.6.0
+##  prometheus:
+##    tag: v2.21.0
 
 zookeeper:
 #  resources:
@@ -37,7 +37,7 @@ zookeeper:
 bookkeeper:
   metadata:
     image:
-      tag: 2.5.2
+      tag: 2.6.0
 #  resources:
 #    limits:
 #      memory: 512Mi
@@ -60,9 +60,9 @@ bookkeeper:
 #      memory: 128Mi
 #      cpu: 0.1
 
-pulsar_metadata:
-  image:
-    tag: 2.5.2
+#pulsar_metadata:
+#  image:
+#    tag: 2.6.0
 
 #broker:
 #  resources:
@@ -101,7 +101,7 @@ prometheus:
 #      cpu: 0.1
   volumes:
     data:
-      size: 3Gi
+      size: 10Gi
 
 grafana:
   #    limits:
@@ -133,7 +133,7 @@ pulsar_manager:
 #      memory: 250Mi
 #      cpu: 0.1
   redirect:
-    host: pulsar-manager-dev.singlespot.com
+    host: pulsar-manager-preprod.singlespot.com
   volumes:
     data:
       size: 1Gi
