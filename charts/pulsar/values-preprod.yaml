@@ -20,7 +20,7 @@ namespace: pulsar-preprod
 ##  prometheus:
 ##    tag: v2.21.0
 
-zookeeper:
+#zookeeper:
 #  resources:
 #    limits:
 #      memory: 256Mi
@@ -28,16 +28,16 @@ zookeeper:
 #    requests:
 #      memory: 256Mi
 #      cpu: 0.1
-  volumes:
-    data:
-      size: 5Gi
-    dataLog:
-      size: 1Gi
+#  volumes:
+#    data:
+#      size: 5Gi
+#    dataLog:
+#      size: 1Gi
 
-bookkeeper:
-  metadata:
-    image:
-      tag: 2.6.0
+#bookkeeper:
+#  metadata:
+#    image:
+#      tag: 2.6.0
 #  resources:
 #    limits:
 #      memory: 512Mi
@@ -45,11 +45,11 @@ bookkeeper:
 #    requests:
 #      memory: 512Mi
 #      cpu: 0.2
-  volumes:
-    journal:
-      size: 5Gi
-    ledgers:
-      size: 15Gi
+#  volumes:
+#    journal:
+#      size: 5Gi
+#    ledgers:
+#      size: 15Gi
 
 #autorecovery:
 #  resources:
@@ -91,7 +91,7 @@ bookkeeper:
 #      memory: 256Mi
 #      cpu: 0.1
 
-prometheus:
+#prometheus:
 #  resources:
 #    limits:
 #      memory: 256Mi
@@ -99,9 +99,9 @@ prometheus:
 #    requests:
 #      memory: 256Mi
 #      cpu: 0.1
-  volumes:
-    data:
-      size: 10Gi
+#  volumes:
+#    data:
+#      size: 10Gi
 
 grafana:
   #    limits:
@@ -113,8 +113,8 @@ grafana:
 #  reso: 0.1
   env:
     GF_SERVER_ROOT_URL: "https://pulsar-grafana-preprod.singlespot.com"
-  persistence:
-    size: 1Gi
+#  persistence:
+#    size: 1Gi
 #  sidecar:
 #    resources:
 #      limits:
@@ -134,9 +134,9 @@ pulsar_manager:
 #      cpu: 0.1
   redirect:
     host: pulsar-manager-preprod.singlespot.com
-  volumes:
-    data:
-      size: 1Gi
+#  volumes:
+#    data:
+#      size: 1Gi
 
 #presto:
 #  coordinator:

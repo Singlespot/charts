@@ -58,6 +58,21 @@ spec:
 {{ toYaml .Values.toolset.tolerations | indent 8 }}
     {{- end }}
       terminationGracePeriodSeconds: {{ .Values.toolset.gracePeriod }}
+      initContainers:
+      # This init container will wait for at least one broker to be ready before running the toolset
+      - name: wait-broker-ready
+        image: "{{ .Values.images.proxy.repository }}:{{ .Values.images.proxy.tag }}"
+        imagePullPolicy: {{ .Values.images.proxy.pullPolicy }}
+        command: ["sh", "-c"]
+        args:
+          - >-
+            set -e;
+            brokerServiceNumber="$(nslookup -timeout=10 {{ template "pulsar.fullname" . }}-{{ .Values.broker.component }} | grep Name | wc -l)";
+            until [ ${brokerServiceNumber} -ge 1 ]; do
+              echo "pulsar cluster {{ template "pulsar.fullname" . }} isn't initialized yet ... check in 10 seconds ...";
+              sleep 10;
+              brokerServiceNumber="$(nslookup -timeout=10 {{ template "pulsar.fullname" . }}-{{ .Values.broker.component }} | grep Name | wc -l)";
+            done;
       containers:
       - name: "pulsar"
         image: "{{ .Values.images.broker.repository }}:{{ .Values.images.broker.tag }}"
@@ -108,9 +123,9 @@ spec:
               exit 1;
             fi
           fi
+          {{- end }}
+          {{- end }}
           echo "Configuration finished";
-          {{- end }}
-          {{- end }}
           sleep 10000000000
         envFrom:
         - configMapRef:

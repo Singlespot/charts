@@ -25,7 +25,7 @@ initialize: true
 ###
 
 ## Namespace to deploy pulsar
-namespace: pulsar
+namespace: pulsar-prod
 namespaceCreate: false
 
 ###
@@ -523,7 +523,7 @@ zookeeper:
   autoRollDeployment: true
   configData:
     PULSAR_MEM: >
-      -Xms64m -Xmx128m
+      -Xms256m -Xmx512m
     PULSAR_GC: >
       -XX:+UseG1GC
       -XX:MaxGCPauseMillis=10
@@ -602,17 +602,17 @@ bookkeeper:
   gracePeriod: 30
   resources:
     limits:
-      memory: 768Mi
+      memory: 6Gi
       cpu: 0.5
     requests:
-      memory: 768Mi
+      memory: 6Gi
       cpu: 0.5
   volumes:
     # use a persistent volume or emptyDir
     persistence: true
     journal:
       name: journal
-      size: 10Gi
+      size: 100Gi
 #      local_storage: true
       storageClassName: gp2
       ## If the storage class is left undefined when using persistence
@@ -631,7 +631,7 @@ bookkeeper:
       #     iopsPerGB: "50"
     ledgers:
       name: ledgers
-      size: 50Gi
+      size: 500Gi
 #      local_storage: true
       storageClassName: gp2
       ## If the storage class is left undefined when using persistence
@@ -659,14 +659,14 @@ bookkeeper:
   configData:
     # `BOOKIE_MEM` is used for `bookie shell`
     BOOKIE_MEM: >
-      -Xms128m
-      -Xmx256m
-      -XX:MaxDirectMemorySize=256m
+      -Xms3g
+      -Xmx6g
+      -XX:MaxDirectMemorySize=6g
     # we use `bin/pulsar` for starting bookie daemons
     PULSAR_MEM: >
-      -Xms128m
-      -Xmx256m
-      -XX:MaxDirectMemorySize=256m
+      -Xms3g
+      -Xmx6g
+      -XX:MaxDirectMemorySize=6g
     PULSAR_GC: >
       -XX:+UseG1GC
       -XX:MaxGCPauseMillis=10
@@ -725,10 +725,10 @@ autorecovery:
   gracePeriod: 30
   resources:
     limits:
-      memory: 384Mi
+      memory: 512Mi
       cpu: 0.25
     requests:
-      memory: 384Mi
+      memory: 512Mi
       cpu: 0.25
   extraInitContainers: {}
   ## Bookkeeper auto-recovery configmap
@@ -738,7 +738,7 @@ autorecovery:
   autoRollDeployment: true
   configData:
     BOOKIE_MEM: >
-      -Xms64m -Xmx64m
+      -Xms256m -Xmx256m
 
 ## Pulsar Zookeeper metadata. The metadata will be deployed as
 ## soon as the last zookeeper node is reachable. The deployment
@@ -819,10 +819,10 @@ broker:
   advertisedPodIP: false
   resources:
     limits:
-      memory: 512Mi
+      memory: 3Gi
       cpu: 0.5
     requests:
-      memory: 512Mi
+      memory: 3Gi
       cpu: 0.5
   extraInitContainers: {}
   ## Broker configmap
@@ -832,7 +832,7 @@ broker:
   autoRollDeployment: true
   configData:
     PULSAR_MEM: >
-      -Xms128m -Xmx256m -XX:MaxDirectMemorySize=256m
+      -Xms1536m -Xmx3g -XX:MaxDirectMemorySize=3g
     PULSAR_GC: >
       -XX:+UseG1GC
       -XX:MaxGCPauseMillis=10
@@ -849,8 +849,8 @@ broker:
       -XX:-ResizePLAB
       -XX:+ExitOnOutOfMemoryError
       -XX:+PerfDisableSharedMem
-    AWS_ACCESS_KEY_ID: "[YOUR AWS ACCESS KEY ID]"
-    AWS_SECRET_ACCESS_KEY: "[YOUR SECRET]"
+#    AWS_ACCESS_KEY_ID: "[YOUR AWS ACCESS KEY ID]"
+#    AWS_SECRET_ACCESS_KEY: "[YOUR SECRET]"
     managedLedgerDefaultEnsembleSize: "3"
     managedLedgerDefaultWriteQuorum: "3"
     managedLedgerDefaultAckQuorum: "2"
@@ -982,11 +982,11 @@ proxy:
   gracePeriod: 30
   resources:
     limits:
-      memory: 256Mi
-      cpu: 0.5
+      memory: 512Mi
+      cpu: 0.25
     requests:
-      memory: 256Mi
-      cpu: 0.5
+      memory: 512Mi
+      cpu: 0.25
   extraInitContainers: {}
   ## Proxy configmap
   ## templates/proxy-configmap.yaml
@@ -1000,7 +1000,7 @@ proxy:
   brokerWebServiceURLTLS: ""
   configData:
     PULSAR_MEM: >
-      -Xms64m -Xmx64m -XX:MaxDirectMemorySize=64m
+      -Xms256m -Xmx512m -XX:MaxDirectMemorySize=512m
     PULSAR_GC: >
       -XX:+UseG1GC
       -XX:MaxGCPauseMillis=10
@@ -1050,11 +1050,11 @@ toolset:
   gracePeriod: 0
   resources:
     limits:
-      memory: 512Mi
-      cpu: 0.25
+      memory: 1Gi
+      cpu: 1
     requests:
-      memory: 512Mi
-      cpu: 0.25
+      memory: 1Gi
+      cpu: 1
   ## Bastion configmap
   ## templates/bastion-configmap.yaml
   ##
@@ -1062,9 +1062,9 @@ toolset:
   autoRollDeployment: true
   configData:
     PULSAR_MEM: >
-      -Xms64M
-      -Xmx128M
-      -XX:MaxDirectMemorySize=128M
+      -Xms512m
+      -Xmx1g
+      -XX:MaxDirectMemorySize=1g
 
 #############################################################
 ### Monitoring Stack : Prometheus / Grafana
@@ -1140,7 +1140,13 @@ configmapReload:
     ## configmap-reload resource requests and limits
     ## Ref: http://kubernetes.io/docs/user-guide/compute-resources/
     ##
-    resources: {}
+    resources:
+      limits:
+        memory: 512Mi
+        cpu: 0.25
+      requests:
+        memory: 512Mi
+        cpu: 0.25
 
 ## Monitoring Stack: Prometheus
 ## templates/prometheus-deployment.yaml
@@ -1329,7 +1335,9 @@ grafana:
   ## Sidecars that collect the configmaps with specified label and stores the included files them into the respective folders
   ## Requires at least Grafana 5 to work and can't be used together with parameters dashboardProviders, datasources and dashboards
   sidecar:
-    image: kiwigrid/k8s-sidecar:0.1.151
+    image:
+      repository: kiwigrid/k8s-sidecar
+      tag: 0.1.151
     imagePullPolicy: IfNotPresent
     resources:
       limits:
@@ -2145,4 +2153,4 @@ prometheusJobs:
   - jobName: producer-api
     host: pulsar-producer-metrics.singlespot.com
 
-servicesNamespace: pulsar-services
+servicesNamespace: pulsar-services-prod

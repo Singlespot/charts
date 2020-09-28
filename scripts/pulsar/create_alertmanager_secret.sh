@@ -71,6 +71,6 @@ function generate_alertmanager_secret() {
     kubectl create secret generic ${secret_name} -n ${namespace} \
       --from-literal="SLACK_API_URL=${slack_api_url}" \
       --from-literal="SLACK_CHANNEL=${slack_channel}" \
-      --dry-run=client -o yaml | kubectl -n ${namespace} apply -f -
+      --dry-run -o yaml | kubectl -n ${namespace} apply -f -
 }
 generate_alertmanager_secret

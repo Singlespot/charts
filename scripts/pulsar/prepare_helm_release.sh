@@ -100,7 +100,7 @@ done
 namespace=${namespace:-pulsar}
 release=${release:-pulsar-dev}
 cc_admin=${cc_admin:-admin}
-cc_password=${cc_password:-$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)}
+cc_password=${cc_password:-$(cat /dev/urandom | LC_CTYPE=C tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)}
 service_gcs_account_file=${service_gcs_account_file:-"/pulsar/keys/gcs.json"}
 gcs_offloader_service_account_keyfile=${gcs_offloader_service_account_keyfile:-"/pulsar/keys/gcs.json"}
 pulsar_superusers=${pulsar_superusers:-"proxy-admin,broker-admin,admin,pulsar-manager-admin"}

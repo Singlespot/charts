@@ -35,5 +35,5 @@ dependencies:
   repository: https://grafana.github.io/loki/charts
   condition: monitoring.loki
 - name: grafana
-  version: 5.6.6
+  version: 5.6.8
   repository: https://grafana.github.io/helm-charts
