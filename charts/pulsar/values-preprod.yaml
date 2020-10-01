@@ -20,67 +20,95 @@ namespace: pulsar-preprod
 ##  prometheus:
 ##    tag: v2.21.0
 
-#zookeeper:
-#  resources:
-#    limits:
-#      memory: 256Mi
-#      cpu: 0.1
-#    requests:
-#      memory: 256Mi
-#      cpu: 0.1
-#  volumes:
-#    data:
-#      size: 5Gi
-#    dataLog:
-#      size: 1Gi
+zookeeper:
+  resources:
+    limits:
+      memory: 384Mi
+      cpu: 125m
+    requests:
+      memory: 384Mi
+      cpu: 125m
+  volumes:
+    data:
+      size: 5Gi
+    dataLog:
+      size: 1Gi
+  configData:
+    PULSAR_MEM: >
+      -Xms192m -Xmx384m
 
-#bookkeeper:
-#  metadata:
-#    image:
-#      tag: 2.6.0
-#  resources:
-#    limits:
-#      memory: 512Mi
-#      cpu: 0.2
-#    requests:
-#      memory: 512Mi
-#      cpu: 0.2
-#  volumes:
-#    journal:
-#      size: 5Gi
-#    ledgers:
-#      size: 15Gi
+bookkeeper:
+  metadata:
+    resources:
+      limits:
+        cpu: 250m
+        memory: 2Gi
+      requests:
+        cpu: 250m
+        memory: 2Gi
+  resources:
+    limits:
+      cpu: 250m
+      memory: 2Gi
+    requests:
+      cpu: 250m
+      memory: 2Gi
+  volumes:
+    journal:
+      size: 5Gi
+    ledgers:
+      size: 15Gi
+  configData:
+    # `BOOKIE_MEM` is used for `bookie shell`
+    BOOKIE_MEM: >
+      -Xms512m
+      -Xmx1g
+      -XX:MaxDirectMemorySize=1g
+    # we use `bin/pulsar` for starting bookie daemons
+    PULSAR_MEM: >
+      -Xms1g
+      -Xmx2g
+      -XX:MaxDirectMemorySize=2g
 
-#autorecovery:
-#  resources:
-#    limits:
-#      memory: 128Mi
-#      cpu: 0.1
-#    requests:
-#      memory: 128Mi
-#      cpu: 0.1
+autorecovery:
+  resources:
+    limits:
+      cpu: 125m
+      memory: 384Mi
+    requests:
+      cpu: 125m
+      memory: 384Mi
+  configData:
+    BOOKIE_MEM: >
+      -Xms128m -Xmx256m
 
 #pulsar_metadata:
 #  image:
 #    tag: 2.6.0
 
-#broker:
-#  resources:
-#    limits:
-#      memory: 512Mi
-#      cpu: 0.2
-#    requests:
-#      memory: 512Mi
-#      cpu: 0.2
+broker:
+  resources:
+    limits:
+      cpu: 250m
+      memory: 1Gi
+    requests:
+      cpu: 250m
+      memory: 1Gi
+  configData:
+    PULSAR_MEM: >
+      -Xms512m -Xmx1g -XX:MaxDirectMemorySize=1g
 
-#proxy:
-#  resources:
-#    limits:
-#      memory: 128Mi
-#      cpu: 0.2
-#    requests:
-#      memory: 128Mi
-#      cpu: 0.2
+proxy:
+  resources:
+    limits:
+      cpu: 125m
+      memory: 512Mi
+    requests:
+      cpu: 125m
+      memory: 512Mi
+  configData:
+    PULSAR_MEM: >
+      -Xms256m -Xmx512m -XX:MaxDirectMemorySize=512m
 
 #toolset:
 #  resources:
@@ -91,14 +119,14 @@ namespace: pulsar-preprod
 #      memory: 256Mi
 #      cpu: 0.1
 
-#prometheus:
-#  resources:
-#    limits:
-#      memory: 256Mi
-#      cpu: 0.1
-#    requests:
-#      memory: 256Mi
-#      cpu: 0.1
+prometheus:
+  resources:
+    limits:
+      memory: 768Mi
+      cpu: 250m
+    requests:
+      memory: 768Mi
+      cpu: 250m
 #  volumes:
 #    data:
 #      size: 10Gi
