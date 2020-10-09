@@ -458,10 +458,10 @@ zookeeper:
   gracePeriod: 30
   resources:
     limits:
-      memory: 768Mi
+      memory: 1Gi
       cpu: 250m
     requests:
-      memory: 768Mi
+      memory: 1Gi
       cpu: 250m
   volumes:
     # use a persistent volume or emptyDir
@@ -564,10 +564,10 @@ bookkeeper:
     ##
     resources:
       limits:
-        cpu: 1
+        cpu: 750m
         memory: 8Gi
       requests:
-        cpu: 1
+        cpu: 750m
         memory: 8Gi
   replicaCount: 4
   ports:
@@ -823,16 +823,16 @@ broker:
   advertisedPodIP: false
   resources:
     limits:
-      cpu: 500m
-      memory: 4Gi
+      cpu: "1.5"
+      memory: 6Gi
     requests:
-      cpu: 500m
-      memory: 4Gi
+      cpu: "1.5"
+      memory: 6Gi
   extraInitContainers: {}
   ## Broker configmap
   ## templates/broker-configmap.yaml
   ##
-  # Automtically Roll Deployments when configmap is changed
+  # Automatically Roll Deployments when configmap is changed
   autoRollDeployment: true
   configData:
     PULSAR_MEM: >
@@ -1169,10 +1169,10 @@ prometheus:
   resources:
     limits:
       memory: 768Mi
-      cpu: 250m
+      cpu: 500m
     requests:
       memory: 768Mi
-      cpu: 250m
+      cpu: 500m
   volumes:
     # use a persistent volume or emptyDir
     persistence: true
