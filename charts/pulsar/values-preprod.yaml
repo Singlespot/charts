@@ -1,24 +1,24 @@
 namespace: pulsar-preprod
 
-#images:
-#  zookeeper:
-#    tag: 2.6.0
-#  bookie:
-#    tag: 2.6.0
-#  presto:
-#    tag: 2.6.0
-#  autorecovery:
-#    tag: 2.6.0
-#  broker:
-#    tag: 2.6.0
-#  proxy:
-#    tag: 2.6.0
-#  pulsar_detector:
-#    tag: 2.6.0
-#  functions:
-#    tag: 2.6.0
-##  prometheus:
-##    tag: v2.21.0
+images:
+  zookeeper:
+    tag: 2.6.1
+  bookie:
+    tag: 2.6.1
+  presto:
+    tag: 2.6.1
+  autorecovery:
+    tag: 2.6.1
+  broker:
+    tag: 2.6.1
+  proxy:
+    tag: 2.6.1
+  pulsar_detector:
+    tag: 2.6.1
+  functions:
+    tag: 2.6.1
+#  prometheus:
+#    tag: v2.21.0
 
 zookeeper:
   resources:
@@ -97,6 +97,9 @@ broker:
   configData:
     PULSAR_MEM: >
       -Xms512m -Xmx1g -XX:MaxDirectMemorySize=1g
+    managedLedgerDefaultEnsembleSize: "2"
+    managedLedgerDefaultWriteQuorum: "2"
+    managedLedgerDefaultAckQuorum: "2"
 
 proxy:
   resources:
