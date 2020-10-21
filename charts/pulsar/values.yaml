@@ -115,49 +115,49 @@ monitoring:
 images:
   zookeeper:
     repository: apachepulsar/pulsar-all
-    tag: 2.6.0
+    tag: 2.6.1
 #    repository: streamnative/platform
 #    tag: v1.0.0
     pullPolicy: IfNotPresent
   bookie:
     repository: apachepulsar/pulsar-all
-    tag: 2.6.0
+    tag: 2.6.1
 #    repository: streamnative/platform
 #    tag: v1.0.0
     pullPolicy: IfNotPresent
   presto:
     repository: apachepulsar/pulsar-all
-    tag: 2.6.0
+    tag: 2.6.1
 #    repository: streamnative/platform
 #    tag: v1.0.0
     pullPolicy: IfNotPresent
   autorecovery:
     repository: apachepulsar/pulsar-all
-    tag: 2.6.0
+    tag: 2.6.1
 #    repository: streamnative/platform
 #    tag: v1.0.0
     pullPolicy: IfNotPresent
   broker:
     repository: apachepulsar/pulsar-all
-    tag: 2.6.0
+    tag: 2.6.1
 #    repository: streamnative/platform-all
 #    tag: v1.0.1
     pullPolicy: IfNotPresent
   proxy:
     repository: apachepulsar/pulsar-all
-    tag: 2.6.0
+    tag: 2.6.1
 #    repository: streamnative/platform
 #    tag: v1.0.0
     pullPolicy: IfNotPresent
   pulsar_detector:
     repository: apachepulsar/pulsar-all
-    tag: 2.6.0
+    tag: 2.6.1
 #    repository: streamnative/sn-pulsar
 #    tag: 2.3.2-1
     pullPolicy: IfNotPresent
   functions:
     repository: apachepulsar/pulsar-all
-    tag: 2.6.0
+    tag: 2.6.1
 #    repository: streamnative/platform
 #    tag: v1.0.0
     pullPolicy: IfNotPresent
@@ -564,10 +564,10 @@ bookkeeper:
     ##
     resources:
       limits:
-        cpu: 750m
+        cpu: "1"
         memory: 8Gi
       requests:
-        cpu: 750m
+        cpu: "1"
         memory: 8Gi
   replicaCount: 4
   ports:
@@ -754,7 +754,7 @@ pulsar_metadata:
   image:
     # the image used for running `pulsar-cluster-initialize` job
     repository: apachepulsar/pulsar-all
-    tag: 2.6.0
+    tag: 2.6.1
     # repository: streamnative/platform
     # tag: v1.0.0
     pullPolicy: IfNotPresent
@@ -1168,10 +1168,10 @@ prometheus:
   port: 9090
   resources:
     limits:
-      memory: 768Mi
+      memory: 1Gi
       cpu: 500m
     requests:
-      memory: 768Mi
+      memory: 1Gi
       cpu: 500m
   volumes:
     # use a persistent volume or emptyDir
