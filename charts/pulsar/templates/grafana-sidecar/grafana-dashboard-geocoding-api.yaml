@@ -426,7 +426,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "rate(geocoding_api_gunicorn_requests[1m])",
+              "expr": "sum(rate(geocoding_api_gunicorn_requests[1m]) > 0)",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "",
@@ -535,7 +535,7 @@ data:
           "tableColumn": "",
           "targets": [
             {
-              "expr": "geocoding_api_gunicorn_log_critical",
+              "expr": "sum(geocoding_api_gunicorn_log_critical or vector(0))",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "",
@@ -673,7 +673,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "geocoding_api_gunicorn_request_duration_sum / geocoding_api_gunicorn_request_duration_count",
+              "expr": "sum(geocoding_api_gunicorn_request_duration_sum) / sum(geocoding_api_gunicorn_request_duration_count)",
               "format": "time_series",
               "intervalFactor": 1,
               "refId": "A"
@@ -757,21 +757,21 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "geocoding_api_gunicorn_request_duration{quantile=\"0.5\"}",
+              "expr": "avg(geocoding_api_gunicorn_request_duration{quantile=\"0.5\"} > 0)",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "50th percentile",
               "refId": "A"
             },
             {
-              "expr": "geocoding_api_gunicorn_request_duration{quantile=\"0.9\"}",
+              "expr": "avg(geocoding_api_gunicorn_request_duration{quantile=\"0.9\"} > 0)",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "90th percentile",
               "refId": "B"
             },
             {
-              "expr": "geocoding_api_gunicorn_request_duration{quantile=\"0.99\"}",
+              "expr": "avg(geocoding_api_gunicorn_request_duration{quantile=\"0.99\"} > 0)",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "99th percentile",
