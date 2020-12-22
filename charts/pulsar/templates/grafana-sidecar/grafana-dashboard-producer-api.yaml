@@ -86,7 +86,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(http_response_code{exported_job=\"data_stream_producer_gunicorn_response_code\", status=~\"2..\"}) / sum(data_stream_producer_gunicorn_requests) * 100",
+              "expr": "sum(http_response_code{exported_job=\"producer_api_gunicorn_response_code\", status=~\"2..\"}) / sum(producer_api_gunicorn_requests) * 100",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "2XX",
@@ -171,7 +171,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(http_response_code{exported_job=\"data_stream_producer_gunicorn_response_code\", status=~\"3..\"}) / sum(data_stream_producer_gunicorn_requests) * 100",
+              "expr": "sum(http_response_code{exported_job=\"producer_api_gunicorn_response_code\", status=~\"3..\"}) / sum(producer_api_gunicorn_requests) * 100",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "3XX",
@@ -256,7 +256,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(http_response_code{exported_job=\"data_stream_producer_gunicorn_response_code\", status=~\"4..\"}) / sum(data_stream_producer_gunicorn_requests) * 100",
+              "expr": "sum(http_response_code{exported_job=\"producer_api_gunicorn_response_code\", status=~\"4..\"}) / sum(producer_api_gunicorn_requests) * 100",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "4XX",
@@ -341,7 +341,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(http_response_code{exported_job=\"data_stream_producer_gunicorn_response_code\", status=~\"5..\"}) / sum(data_stream_producer_gunicorn_requests) * 100",
+              "expr": "sum(http_response_code{exported_job=\"producer_api_gunicorn_response_code\", status=~\"5..\"}) / sum(producer_api_gunicorn_requests) * 100",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "5XX",
@@ -426,7 +426,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "rate(data_stream_producer_gunicorn_requests[1m])",
+              "expr": "sum(rate(producer_api_gunicorn_requests[1m]) > 0)",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "",
@@ -535,7 +535,7 @@ data:
           "tableColumn": "",
           "targets": [
             {
-              "expr": "data_stream_producer_gunicorn_log_critical",
+              "expr": "sum(producer_api_gunicorn_log_critical or vector(0))",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "",
@@ -616,7 +616,7 @@ data:
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(data_stream_producer_gunicorn_log_exception or vector(0)) + sum(data_stream_producer_gunicorn_log_error or vector(0))",
+              "expr": "sum(producer_api_gunicorn_log_exception or vector(0)) + sum(producer_api_gunicorn_log_error or vector(0))",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "",
@@ -673,7 +673,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "data_stream_producer_gunicorn_request_duration_sum / data_stream_producer_gunicorn_request_duration_count",
+              "expr": "sum(producer_api_gunicorn_request_duration_sum) / sum(producer_api_gunicorn_request_duration_count)",
               "format": "time_series",
               "intervalFactor": 1,
               "refId": "A"
@@ -757,21 +757,21 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "data_stream_producer_gunicorn_request_duration{quantile=\"0.5\"}",
+              "expr": "avg(producer_api_gunicorn_request_duration{quantile=\"0.5\"} > 0)",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "50th percentile",
               "refId": "A"
             },
             {
-              "expr": "data_stream_producer_gunicorn_request_duration{quantile=\"0.9\"}",
+              "expr": "avg(producer_api_gunicorn_request_duration{quantile=\"0.9\"} > 0)",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "90th percentile",
               "refId": "B"
             },
             {
-              "expr": "data_stream_producer_gunicorn_request_duration{quantile=\"0.99\"}",
+              "expr": "avg(producer_api_gunicorn_request_duration{quantile=\"0.99\"} > 0)",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "99th percentile",
