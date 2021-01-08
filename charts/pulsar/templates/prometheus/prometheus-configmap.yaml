@@ -50,6 +50,9 @@ data:
         - '{{ template "pulsar.fullname" . }}-{{ .Values.pulsar_detector.component }}:{{ .Values.pulsar_detector.port }}'
         {{- end }}
       metrics_path: {{ template "pulsar.control_center_path.prometheus" . }}/metrics
+    - job_name: 'kube-state-metrics'
+      static_configs:
+      - targets: ['kube-state-metrics.kube-system.svc.cluster.local:8080']
     {{- range .Values.prometheusJobs }}
     - job_name: '{{ .jobName }}'
       static_configs:

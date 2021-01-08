@@ -604,10 +604,10 @@ bookkeeper:
   gracePeriod: 30
   resources:
     limits:
-      cpu: 1
+      cpu: "1"
       memory: 8Gi
     requests:
-      cpu: 1
+      cpu: "1"
       memory: 8Gi
   volumes:
     # use a persistent volume or emptyDir
@@ -1650,7 +1650,7 @@ alert_manager:
               severity: warning
             annotations:
               summary: "Kubernetes HPA metric availability (instance {{ $labels.instance }})"
-              description: "HPA is not able to colelct metrics\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+              description: "HPA is not able to collect metrics\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
           - alert: KubernetesHpaScaleCapability
             expr: kube_hpa_status_desired_replicas >= kube_hpa_spec_max_replicas
             for: 5m
@@ -1660,13 +1660,13 @@ alert_manager:
               summary: "Kubernetes HPA scale capability (instance {{ $labels.instance }})"
               description: "The maximum number of desired Pods has been hit\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
           - alert: KubernetesPodNotHealthy
-            expr: min_over_time(sum by (kubernetes_node, namespace, pod) (kube_pod_status_phase{phase=~"Pending|Unknown|Failed"} == 1)[1h:])
+            expr: min_over_time(max by (kubernetes_node, namespace, pod) (kube_pod_status_phase{phase=~"Pending|Unknown|Failed"})[5m:]) == 1
             for: 5m
             labels:
               severity: error
             annotations:
               summary: "Kubernetes Pod not healthy (instance {{ $labels.kubernetes_node }})"
-              description: "Pod has been in a non-ready state for longer than an hour.\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+              description: "Pod has been in a non-ready state for longer than 5 minutes.\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
           - alert: KubernetesPodCrashLooping
             expr: rate(kube_pod_container_status_restarts_total[15m]) * 60 * 5 > 5
             for: 5m
@@ -1802,6 +1802,19 @@ alert_manager:
             annotations:
               summary: "CoreDNS Panic Count (instance {{ $labels.instance }})"
               description: "Number of CoreDNS panics encountered\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+      - name: Pulsar
+        rules:
+          - alert: PulsarStorageTooHigh
+            annotations:
+              description: |-
+                Pulsar storage size is above 30GB
+                  VALUE = {{ $value }}
+                  LABELS: {{ $labels }}
+              summary: Pulsar storage size
+            expr: sum(pulsar_storage_size) > 30000000000
+            for: 5m
+            labels:
+              severity: error
 
 ## Components Stack: pulsar_manager
 ## templates/pulsar-manager.yaml
