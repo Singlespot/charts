@@ -115,49 +115,49 @@ monitoring:
 images:
   zookeeper:
     repository: apachepulsar/pulsar-all
-    tag: 2.6.1
+    tag: 2.6.2
 #    repository: streamnative/platform
 #    tag: v1.0.0
     pullPolicy: IfNotPresent
   bookie:
     repository: apachepulsar/pulsar-all
-    tag: 2.6.1
+    tag: 2.6.2
 #    repository: streamnative/platform
 #    tag: v1.0.0
     pullPolicy: IfNotPresent
   presto:
     repository: apachepulsar/pulsar-all
-    tag: 2.6.1
+    tag: 2.6.2
 #    repository: streamnative/platform
 #    tag: v1.0.0
     pullPolicy: IfNotPresent
   autorecovery:
     repository: apachepulsar/pulsar-all
-    tag: 2.6.1
+    tag: 2.6.2
 #    repository: streamnative/platform
 #    tag: v1.0.0
     pullPolicy: IfNotPresent
   broker:
     repository: apachepulsar/pulsar-all
-    tag: 2.6.1
+    tag: 2.6.2
 #    repository: streamnative/platform-all
 #    tag: v1.0.1
     pullPolicy: IfNotPresent
   proxy:
     repository: apachepulsar/pulsar-all
-    tag: 2.6.1
+    tag: 2.6.2
 #    repository: streamnative/platform
 #    tag: v1.0.0
     pullPolicy: IfNotPresent
   pulsar_detector:
     repository: apachepulsar/pulsar-all
-    tag: 2.6.1
+    tag: 2.6.2
 #    repository: streamnative/sn-pulsar
 #    tag: 2.3.2-1
     pullPolicy: IfNotPresent
   functions:
     repository: apachepulsar/pulsar-all
-    tag: 2.6.1
+    tag: 2.6.2
 #    repository: streamnative/platform
 #    tag: v1.0.0
     pullPolicy: IfNotPresent
@@ -205,6 +205,7 @@ tls:
   proxy:
     enabled: false
     cert_name: tls-proxy
+    untrustedCa: true
   # settings for generating certs for proxy
   pulsar_detector:
     enabled: false
@@ -230,6 +231,9 @@ tls:
   pulsar_manager:
     enabled: false
     cert_name: tls-pulsar-manager
+  presto:
+    enabled: false
+    cert_name: tls-presto
 
 # Enable or disable broker authentication and authorization.
 auth:
@@ -248,6 +252,8 @@ auth:
     broker: "broker-admin"
     # proxy to broker communication
     proxy: "proxy-admin"
+    # websocket proxy to broker communication
+    websocket: "ws-admin"
     # pulsar-admin client to broker/proxy communication
     client: "admin"
     # pulsar-manager to broker/proxy communication
@@ -324,6 +330,9 @@ external_dns:
   serviceAcct:
     annotations: {}
   securityContext: {}
+  extraMounts: []
+  extraEnv: []
+
 
 ## Domain requested from External DNS
 domain:
@@ -350,6 +359,19 @@ ingress:
     type: LoadBalancer
     annotations: {}
     extraSpec: {}
+  ## templates/presto-service-ingress.yaml
+  ##
+  ## Ingresses for exposing presto service publicly
+  presto:
+    enabled: false
+    tls:
+      enabled: true
+    type: LoadBalancer
+    annotations: {}
+    extraSpec: {}
+    ports:
+      http: 80
+      https: 443
   ## templates/control-center-ingress.yaml
   ##
   ## Ingresses for exposing monitoring/management services publicly
@@ -408,7 +430,7 @@ imagePuller:
 
 ## Common properties applied to pulsar components
 common:
-  extraInitContainers: {}
+  extraInitContainers: []
 
 ## Pulsar: Zookeeper cluster
 ## templates/zookeeper-statefulset.yaml
@@ -508,7 +530,7 @@ zookeeper:
       #   mountOptions:
       #   extraParameters:
       #     iopsPerGB: "50"
-  extraInitContainers: {}
+  extraInitContainers: []
   ## Zookeeper configmap
   ## templates/zookeeper-configmap.yaml
   ##
@@ -520,7 +542,7 @@ zookeeper:
     enabled: false
     # The zookeeper servers to observe/join
     zkServers: []
-  # Automtically Roll Deployments when configmap is changed
+  # Automatically Roll Deployments when configmap is changed
   autoRollDeployment: true
   configData:
     PULSAR_MEM: >
@@ -609,6 +631,19 @@ bookkeeper:
     requests:
       cpu: "1"
       memory: 8Gi
+  # Definition of the serviceAccount used to run bookies.
+  serviceAccount:
+    # Specifies whether to use a service account to run this component
+    use: true
+    # Specifies whether a service account should be created
+    create: true
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+    # Extra annotations for the serviceAccount definition. This can either be
+    # YAML or a YAML-formatted multi-line templated string map of the
+    # annotations to apply to the serviceAccount.
+    annotations: {}
   volumes:
     # use a persistent volume or emptyDir
     persistence: true
@@ -650,11 +685,11 @@ bookkeeper:
         # mountOptions:
         # extraParameters:
         #   iopsPerGB: "50"
-  extraInitContainers: {}
+  extraInitContainers: []
   ## Bookkeeper configmap
   ## templates/bookkeeper-configmap.yaml
   ##
-  # Automtically Roll Deployments when configmap is changed
+  # Automatically Roll Deployments when configmap is changed
   autoRollDeployment: true
   placementPolicy:
     rackAware: true
@@ -733,11 +768,11 @@ autorecovery:
     requests:
       cpu: 250m
       memory: 768Mi
-  extraInitContainers: {}
+  extraInitContainers: []
   ## Bookkeeper auto-recovery configmap
   ## templates/autorecovery-configmap.yaml
   ##
-  # Automtically Roll Deployments when configmap is changed
+  # Automatically Roll Deployments when configmap is changed
   autoRollDeployment: true
   configData:
     BOOKIE_MEM: >
@@ -754,7 +789,7 @@ pulsar_metadata:
   image:
     # the image used for running `pulsar-cluster-initialize` job
     repository: apachepulsar/pulsar-all
-    tag: 2.6.1
+    tag: 2.6.2
     # repository: streamnative/platform
     # tag: v1.0.0
     pullPolicy: IfNotPresent
@@ -828,7 +863,22 @@ broker:
     requests:
       cpu: "1.5"
       memory: 6Gi
-  extraInitContainers: {}
+  extraInitContainers: []
+  extraVolumes: []
+  extraVolumeMounts: []
+  # Definition of the serviceAccount used to run brokers.
+  serviceAccount:
+    # Specifies whether to use a service account to run this component
+    use: true
+    # Specifies whether a service account should be created
+    create: true
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+    # Extra annotations for the serviceAccount definition. This can either be
+    # YAML or a YAML-formatted multi-line templated string map of the
+    # annotations to apply to the serviceAccount.
+    annotations: {}
   ## Broker configmap
   ## templates/broker-configmap.yaml
   ##
@@ -871,6 +921,7 @@ broker:
     maxUnavailable: 1
   ### Broker service account
   ## templates/broker-service-account.yaml
+  # deprecated: use `serviceAccount` section to configure service account.
   service_account:
     annotations: {}
   offload:
@@ -923,7 +974,6 @@ functions:
     functionsDirectory: ./functions
     narExtractionDirectory: ""
   functionRuntimeFactoryConfigs:
-    pulsarRootDir: /pulsar
 
 ## Pulsar: pulsar detector
 ## templates/pulsar-detector-statefulset.yaml
@@ -934,6 +984,21 @@ pulsar_detector:
 
   gracePeriod: 30
   port: 9000
+
+  # Definition of the serviceAccount used to run brokers.
+  serviceAccount:
+    # Specifies whether to use a service account to run this component
+    use: true
+    # Specifies whether a service account should be created
+    create: true
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+    # Extra annotations for the serviceAccount definition. This can either be
+    # YAML or a YAML-formatted multi-line templated string map of the
+    # annotations to apply to the serviceAccount.
+    annotations: {}
+
   ## Proxy service
   ## templates/pulsar-detector-service.yaml
   ##
@@ -992,11 +1057,48 @@ proxy:
     requests:
       cpu: 250m
       memory: 2Gi
-  extraInitContainers: {}
+  extraInitContainers: []
+  extraVolumes: []
+  extraVolumeMounts: []
+  # Definition of the serviceAccount used to run proxies.
+  serviceAccount:
+    # Specifies whether to use a service account to run this component
+    use: true
+    # Specifies whether a service account should be created
+    create: true
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+    # Extra annotations for the serviceAccount definition. This can either be
+    # YAML or a YAML-formatted multi-line templated string map of the
+    # annotations to apply to the serviceAccount.
+    annotations: {}
+  websocket:
+    component: websocket
+    enabled: false
+    configData:
+      PULSAR_MEM: >
+        -Xms64m -Xmx64m -XX:MaxDirectMemorySize=64m
+      PULSAR_GC: >
+        -XX:+UseG1GC
+        -XX:MaxGCPauseMillis=10
+        -Dio.netty.leakDetectionLevel=disabled
+        -Dio.netty.recycler.linkCapacity=1024
+        -XX:+ParallelRefProcEnabled
+        -XX:+UnlockExperimentalVMOptions
+        -XX:+AggressiveOpts
+        -XX:+DoEscapeAnalysis
+        -XX:ParallelGCThreads=4
+        -XX:ConcGCThreads=4
+        -XX:G1NewSizePercent=50
+        -XX:+DisableExplicitGC
+        -XX:-ResizePLAB
+        -XX:+ExitOnOutOfMemoryError
+        -XX:+PerfDisableSharedMem
   ## Proxy configmap
   ## templates/proxy-configmap.yaml
   ##
-  # Automtically Roll Deployments when configmap is changed
+  # Automatically Roll Deployments when configmap is changed
   autoRollDeployment: true
   # Config proxy to point to an existing broker clusters
   brokerServiceURL: ""
@@ -1030,6 +1132,8 @@ proxy:
     https: 443
     pulsar: 6650
     pulsarssl: 6651
+    websocket: 9090
+    websockettls: 9443
   service:
     annotations:
       service.beta.kubernetes.io/aws-load-balancer-internal: 0.0.0.0/0
@@ -1064,7 +1168,7 @@ toolset:
   ## Bastion configmap
   ## templates/bastion-configmap.yaml
   ##
-  # Automtically Roll Deployments when configmap is changed
+  # Automatically Roll Deployments when configmap is changed
   autoRollDeployment: true
   configData:
     PULSAR_MEM: >
@@ -1173,6 +1277,19 @@ prometheus:
     requests:
       memory: 1Gi
       cpu: 500m
+  # Definition of the serviceAccount used to run brokers.
+  serviceAccount:
+    # Specifies whether to use a service account to run this component
+    use: true
+    # Specifies whether a service account should be created
+    create: true
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+    # Extra annotations for the serviceAccount definition. This can either be
+    # YAML or a YAML-formatted multi-line templated string map of the
+    # annotations to apply to the serviceAccount.
+    annotations: {}
   volumes:
     # use a persistent volume or emptyDir
     persistence: true
@@ -1208,11 +1325,14 @@ prometheus:
       failureThreshold: 10
       initialDelaySeconds: 30
       periodSeconds: 10
+  customRelabelConfigs: []
 
   ## Prometheus service
   ## templates/prometheus-service.yaml
   ##
   service:
+    # expose the load balancer
+    # type: LoadBalancer
     annotations: {}
 
 datadog:
@@ -1821,6 +1941,9 @@ alert_manager:
 ##
 pulsar_manager:
   component: pulsar-manager
+  # this can be used to indicate to use vault auth for pulsar-manager
+  # even if authentication isn't enabled for other components
+  force_vault: false
   ports:
     frontend: 9527
     backend: 7750
@@ -1872,7 +1995,13 @@ pulsar_manager:
   ## templates/pulsar-manager-service.yaml
   ##
   service:
-    port: 443
+    # expose the load balancer
+    # type: LoadBalancer
+    spec: {}
+    annotations: {}
+    ports:
+      frontend: 443
+  backend_service:
     spec:
       type: LoadBalancer
     annotations:
@@ -1910,6 +2039,22 @@ rbac:
 
 # Deploy pulsar sql
 presto:
+  security:
+    authentication:
+      jwt:
+        enabled: false
+        publicKeyFileName: "public.key"
+        publicKeyConfigMapName: '[PUBLIC KEY CM NAME]'
+        # the public key stored in the configmap should be persisted in PEM format.
+        # presto prefers the PEM format. If you generate the public key using `pulsar tokens` CLI,
+        # you can use `openssl rsa -pubin -in <public key file> -inform DER -pubout -out <public key file in PEM format> -outform PEM`
+        # to convert the public key file to a public key file in PEM format.
+        publicKeyConfigMapKey: 'public.key'
+    rules: >
+      {
+        "rules": [
+        ]
+      }
   coordinator:
     component: coordinator
     replicaCount: 1
@@ -1924,6 +2069,7 @@ presto:
     gracePeriod: 10
     ports:
       http: 8081
+      https: 8443
     resources:
       limits:
         memory: 4Gi
@@ -1961,6 +2107,9 @@ presto:
       presto:
         level: DEBUG
   worker:
+    service:
+      spec:
+        type: ClusterIP
     component: worker
     replicaCount: 2
     tolerations: []

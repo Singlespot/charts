@@ -31,6 +31,7 @@ data:
     node.environment={{ .Values.presto.node.environment }}
     node.data-dir={{ template "pulsar.home" . }}/data
   jvm.config: |
+    -Dpresto-temporarily-allow-java8=true
     -server
     -Xmx{{ .Values.presto.coordinator.jvm.memory }}
     -XX:+UseG1GC
@@ -65,16 +66,39 @@ data:
     #
 
     coordinator=true
+{{- if .Values.tls.presto.enabled }}
+    http-server.http.enabled=false
+    http-server.https.enabled=true
+    http-server.https.port={{ .Values.presto.coordinator.ports.https }}
+    http-server.https.keystore.path=<keystore path>
+    http-server.https.keystore.key=<keystore password>
+    discovery.uri=https://localhost:{{ .Values.presto.coordinator.ports.https }}
+    internal-communication.https.required=true
+    internal-communication.https.keystore.path=<keystore path>
+    internal-communication.https.keystore.key=<keystore password>
+{{- else }}
+    http-server.https.enabled=false
+    internal-communication.https.required=false
+    {{- if and .Values.ingress.presto.enabled .Values.ingress.presto.tls.enabled }}
+    http-server.authentication.allow-forwarded-https=true
+    dispatcher.forwarded-header=ACCEPT
+    {{- end }}
+    http-server.http.enabled=true
     http-server.http.port={{ .Values.presto.coordinator.ports.http }}
+    discovery.uri=http://localhost:{{ .Values.presto.coordinator.ports.http }}
+{{- end }}
     discovery-server.enabled=true
-    discovery.uri=http://{{ template "presto.service" . }}:{{ .Values.presto.coordinator.ports.http }}
     query.max-memory={{ .Values.presto.coordinator.config.query.maxMemory }}
     query.max-memory-per-node={{ .Values.presto.coordinator.config.query.maxMemoryPerNode }}
-    distributed-joins-enabled=true
 {{- if gt (int .Values.presto.worker.replicaCount) 0 }}
     node-scheduler.include-coordinator=false
 {{- else }}
     node-scheduler.include-coordinator=true
+{{- end }}
+{{- if .Values.presto.security.authentication.jwt.enabled }}
+    # JWT Authentication
+    http-server.authentication.type=JWT
+    http-server.authentication.jwt.key-file={{ template "pulsar.home" . }}/conf/presto/{{ .Values.presto.security.authentication.jwt.publicKeyFileName }}
 {{- end }}
 
   log.properties: |
@@ -212,4 +236,12 @@ data:
     # Number of threads to be used for managed ledger scheduled tasks,
     # default is Runtime.getRuntime().availableProcessors().
     # pulsar.managed-ledger-num-scheduler-threads =
+
+  rules.json:
+{{ toYaml .Values.presto.security.rules | indent 2 }}
+  access-control.properties: |
+    # access-control.properties
+    access-control.name=file
+    security.config-file={{ template "pulsar.home" . }}/conf/presto/rules.json
+    security.refresh-period=60s
 {{- end }}

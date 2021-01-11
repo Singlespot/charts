@@ -27,7 +27,7 @@ metadata:
     {{- include "pulsar.standardLabels" . | nindent 4 }}
     component: {{ .Values.presto.coordinator.component }}
 spec:
-  serviceName: "{{ template "pulsar.fullname" . }}-{{ .Values.presto.coordinator.component }}"
+  serviceName: {{ template "presto.service" . }}
   replicas: {{ .Values.presto.coordinator.replicaCount }}
   selector:
     matchLabels:
@@ -97,6 +97,10 @@ spec:
           {{ end }}
       {{- end }}
       terminationGracePeriodSeconds: {{ .Values.presto.coordinator.gracePeriod }}
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+      - name: {{ .Values.imagePullSecrets }}
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}-coordinator
           image: "{{ .Values.images.presto.repository }}:{{ .Values.images.presto.tag }}"
@@ -126,11 +130,20 @@ spec:
           command: ["sh", "-c"]
           args:
             - >-
+              cp {{ template "pulsar.home" . }}/conf/presto/node.properties.template {{ template "pulsar.home" . }}/conf/presto/node.properties;
+              echo "node.id=${HOSTNAME}" >> {{ template "pulsar.home" . }}/conf/presto/node.properties ;
+              echo "node.ip=${POD_IP}" >> {{ template "pulsar.home" . }}/conf/presto/node.properties ;
+              ln -s {{ template "pulsar.home" . }}/conf/presto {{ template "pulsar.home" . }}/lib/presto/etc;
               bin/pulsar sql-worker run \
                 --etc-dir={{ template "pulsar.home" . }}/conf/presto \
                 --data-dir={{ template "pulsar.home" . }}/data;
+          env:
+          - name: POD_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP
           volumeMounts:
-            - mountPath: {{ template "pulsar.home" . }}/conf/presto/node.properties
+            - mountPath: {{ template "pulsar.home" . }}/conf/presto/node.properties.template
               name: config-volume
               subPath: node.properties
             - mountPath: {{ template "pulsar.home" . }}/conf/presto/log.properties
@@ -145,6 +158,17 @@ spec:
             - mountPath: {{ template "pulsar.home" . }}/conf/presto/catalog/pulsar.properties
               name: config-volume
               subPath: pulsar.properties
+            - mountPath: {{ template "pulsar.home" . }}/conf/presto/rules.json
+              name: config-volume
+              subPath: rules.json
+            - mountPath: {{ template "pulsar.home" . }}/conf/presto/access-control.properties
+              name: config-volume
+              subPath: access-control.properties
+            {{- if .Values.presto.security.authentication.jwt.enabled }}
+            - mountPath: {{ template "pulsar.home" . }}/conf/presto/{{ .Values.presto.security.authentication.jwt.publicKeyFileName }}
+              name: public-key-volume
+              subPath: {{ .Values.presto.security.authentication.jwt.publicKeyConfigMapKey  }}
+            {{- end}}
             {{- if .Values.auth.authentication.enabled }}
             {{- if eq .Values.auth.authentication.provider "jwt" }}
             - mountPath: "/pulsar/tokens"
@@ -158,9 +182,15 @@ spec:
               readOnly: true
             {{- end}}
           ports:
-            - name: http-coord
+{{- if .Values.tls.presto.enabled }}
+            - name: https
+              containerPort: {{ .Values.presto.coordinator.ports.https }}
+              protocol: TCP
+{{- else }}
+            - name: http
               containerPort: {{ .Values.presto.coordinator.ports.http }}
               protocol: TCP
+{{- end }}
       volumes:
         {{- if .Values.auth.authentication.enabled }}
         {{- if eq .Values.auth.authentication.provider "jwt" }}
@@ -183,4 +213,9 @@ spec:
         - name: config-volume
           configMap:
             name: "{{ template "pulsar.fullname" . }}-{{ .Values.presto.coordinator.component }}"
+        {{- if .Values.presto.security.authentication.jwt.enabled }}
+        - name: public-key-volume
+          configMap:
+            name: {{ .Values.presto.security.authentication.jwt.publicKeyConfigMapName  }}
+        {{- end}}
 {{- end }}
