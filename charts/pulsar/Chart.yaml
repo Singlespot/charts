@@ -18,7 +18,7 @@
 #
 
 apiVersion: v2
-appVersion: "2.6.1"
+appVersion: "2.6.3"
 description: Apache Pulsar Helm chart for Kubernetes
 name: pulsar
 version: 1.4.0
@@ -35,5 +35,5 @@ dependencies:
   repository: https://grafana.github.io/helm-charts
   condition: monitoring.loki
 - name: grafana
-  version: 6.1.17
+  version: 6.6.3
   repository: https://grafana.github.io/helm-charts
