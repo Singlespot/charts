@@ -30,6 +30,9 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
+  {{- if .Values.pulsar_manager.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.pulsar_manager.ingress.ingressClassName }}
+  {{- end }}
   rules:
     - host: {{ .Values.pulsar_manager.redirect.host }}
       http:

@@ -146,8 +146,7 @@ grafana:
 
   ingress:
     enabled: true
-    annotations:
-      kubernetes.io/ingress.class: nginx
+    ingressClassName: nginx-alb
     hosts:
       - pulsar-grafana-preprod.singlespot.com
   #    limits:
@@ -186,8 +185,6 @@ pulsar_manager:
       frontend: 80
   ingress:
     enabled: true
-    annotations:
-      kubernetes.io/ingress.class: nginx
 
   redirect:
     host: pulsar-manager-preprod.singlespot.com
@@ -492,10 +489,10 @@ alert_manager:
 
 prometheusJobs:
   - jobName: copy-api
-    host: pulsar-copy-metrics-preprod.singlespot.com
+    host: data-stream-copy-statsd.pulsar-services-preprod.svc.cluster.local
   - jobName: geocoding-api
-    host: geocoding-api-metrics-preprod.singlespot.com
+    host: geocoding-api-statsd.pulsar-services-preprod.svc.cluster.local
   - jobName: producer-api
-    host: pulsar-producer-metrics-preprod.singlespot.com
+    host: data-stream-producer-statsd.pulsar-services-preprod.svc.cluster.local
 
 servicesNamespace: pulsar-services-preprod
