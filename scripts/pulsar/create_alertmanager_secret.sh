@@ -20,7 +20,7 @@
 
 usage() {
     cat <<EOF
-This script is used to bootstrap the pulsar namespace before deploying a helm chart. 
+This script is used to bootstrap the pulsar namespace before deploying a Helm chart.
 Options:
        -h,--help                        prints the usage message
        -n,--namespace                   the k8s namespace to install the pulsar helm chart
@@ -70,7 +70,6 @@ secret_name="alertmanager-secret"
 function generate_alertmanager_secret() {
     kubectl create secret generic ${secret_name} -n ${namespace} \
       --from-literal="SLACK_API_URL=${slack_api_url}" \
-      --from-literal="SLACK_CHANNEL=${slack_channel}" \
-      --dry-run -o yaml | kubectl -n ${namespace} apply -f -
+      --from-literal="SLACK_CHANNEL=${slack_channel}"
 }
 generate_alertmanager_secret

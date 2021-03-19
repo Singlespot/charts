@@ -108,6 +108,9 @@ spec:
             periodSeconds: {{ .Values.pulsar_manager.probe.startup.periodSeconds }}
             failureThreshold: {{ .Values.pulsar_manager.probe.startup.failureThreshold }}
           {{- end }}
+          envFrom:
+          - secretRef:
+              name: {{ .Values.pulsar_manager.envFromSecret }}
           command: ["sh", "-c"]
           args:
             - >

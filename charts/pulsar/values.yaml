@@ -2033,13 +2033,14 @@ pulsar_manager:
       # extra arguments
       extraArgs:
         - --third.party.login.option=github \
-        - --github.client.id=d8b48e85bce4010f38e3 \
-        - --github.client.secret=d820a220225544669d5f2758d0dc4c6e51db47be \
+        - --github.client.id=$GITHUB_CLIENT_ID \
+        - --github.client.secret=$GITHUB_CLIENT_SECRET \
         - --github.oauth.host=https://github.com/login/oauth/access_token \
         - --github.user.info=https://api.github.com/user \
         - --github.login.host=https://github.com/login/oauth/authorize \
         - --github.redirect.host=https://pulsar-manager-preprod.singlespot.com \
         - --github.allowed.organizations=Singlespot \
+  envFromSecret: pulsar-manager-secret
   spring:
     datasource:
       username: pulsar
