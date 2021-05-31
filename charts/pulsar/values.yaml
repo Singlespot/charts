@@ -115,49 +115,49 @@ monitoring:
 images:
   zookeeper:
     repository: apachepulsar/pulsar-all
-    tag: 2.6.2
+    tag: 2.7.2
 #    repository: streamnative/platform
 #    tag: v1.0.0
     pullPolicy: IfNotPresent
   bookie:
     repository: apachepulsar/pulsar-all
-    tag: 2.6.2
+    tag: 2.7.2
 #    repository: streamnative/platform
 #    tag: v1.0.0
     pullPolicy: IfNotPresent
   presto:
     repository: apachepulsar/pulsar-all
-    tag: 2.6.2
+    tag: 2.7.2
 #    repository: streamnative/platform
 #    tag: v1.0.0
     pullPolicy: IfNotPresent
   autorecovery:
     repository: apachepulsar/pulsar-all
-    tag: 2.6.2
+    tag: 2.7.2
 #    repository: streamnative/platform
 #    tag: v1.0.0
     pullPolicy: IfNotPresent
   broker:
     repository: apachepulsar/pulsar-all
-    tag: 2.6.2
+    tag: 2.7.2
 #    repository: streamnative/platform-all
 #    tag: v1.0.1
     pullPolicy: IfNotPresent
   proxy:
     repository: apachepulsar/pulsar-all
-    tag: 2.6.2
+    tag: 2.7.2
 #    repository: streamnative/platform
 #    tag: v1.0.0
     pullPolicy: IfNotPresent
   pulsar_detector:
     repository: apachepulsar/pulsar-all
-    tag: 2.6.2
+    tag: 2.7.2
 #    repository: streamnative/sn-pulsar
 #    tag: 2.3.2-1
     pullPolicy: IfNotPresent
   functions:
     repository: apachepulsar/pulsar-all
-    tag: 2.6.2
+    tag: 2.7.2
 #    repository: streamnative/platform
 #    tag: v1.0.0
     pullPolicy: IfNotPresent
@@ -789,7 +789,7 @@ pulsar_metadata:
   image:
     # the image used for running `pulsar-cluster-initialize` job
     repository: apachepulsar/pulsar-all
-    tag: 2.6.2
+    tag: 2.7.2
     # repository: streamnative/platform
     # tag: v1.0.0
     pullPolicy: IfNotPresent
@@ -1295,7 +1295,7 @@ prometheus:
     persistence: true
     data:
       name: data
-      size: 10Gi
+      size: 32Gi
 #      local_storage: true
       storageClassName: gp2
       ## If the storage class is left undefined when using persistence
@@ -1372,17 +1372,16 @@ grafana:
   ## ref: http://kubernetes.io/docs/user-guide/services/
   ##
   service:
-    type: LoadBalancer
-    port: 443
+    type: ClusterIP
+    port: 80
     targetPort: 3000
     # targetPort: 4181 To be used with a proxy extraContainer
-    annotations:
-      service.beta.kubernetes.io/aws-load-balancer-ssl-cert: "arn:aws:acm:eu-west-1:268324876595:certificate/d65266d3-b4ab-43da-b35d-c75681ee6371"
+    annotations: {}
     labels: {}
     portName: service
 
   ingress:
-    enabled: false
+    enabled: true
     ingressClassName: nginx-alb
     hosts:
       - pulsar-grafana.singlespot.com
@@ -1605,18 +1604,6 @@ alert_manager:
   # add alert rules below
   rules:
     groups:
-      - name: Mixed
-        rules:
-          - alert: InstanceDown
-            expr: up == 0
-            for: 1m
-            labels:
-              severity: 'critical'
-            annotations:
-              title: 'Instance {{ $labels.instance }} down'
-              summary: 'Instance {{ $labels.instance }} down'
-              description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 1 minute.\n  LABELS: {{ $labels }}"
-
       - name: Nodes
         rules:
           - alert: HostOutOfDiskSpace
@@ -1646,22 +1633,6 @@ alert_manager:
             annotations:
               summary: "Container killed (instance {{ $labels.instance }})"
               description: "A container has disappeared\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
-          - alert: ContainerCpuUsage
-            expr: (sum(rate(container_cpu_usage_seconds_total{name=~".+"}[3m])) BY (instance, name) * 100) > 80
-            for: 5m
-            labels:
-              severity: warning
-            annotations:
-              summary: "Container CPU usage (instance {{ $labels.instance }})"
-              description: "Container CPU usage is above 80%\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
-          - alert: ContainerMemoryUsage
-            expr: (sum(container_memory_usage_bytes) BY (instance, pod, container) / sum(container_spec_memory_limit_bytes{pod=~".+",pod!~".+prometheus.+",container=~".+"} > 0) BY (instance, pod, container) * 100) > 80
-            for: 5m
-            labels:
-              severity: warning
-            annotations:
-              summary: "Container memory usage is high ({{ $labels.pod }})"
-              description: "Container memory usage is above 80%\n  VALUE = {{ $value }}\n  Pod name: {{ $labels.pod }}\n  Container name: {{ $labels.container }}\n  Instance: {{ $labels.instance }}"
           - alert: ContainerVolumeUsage
             expr: (1 - (sum(container_fs_inodes_free) BY (instance) / sum(container_fs_inodes_total) BY (instance)) * 100) > 80
             for: 5m
@@ -1737,14 +1708,6 @@ alert_manager:
             annotations:
               summary: "Kubernetes Volume out of disk space (instance {{ $labels.instance }})"
               description: "Volume is almost full (< 10% left)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
-          - alert: KubernetesVolumeFullInTwelveHours
-            expr: predict_linear(kubelet_volume_stats_available_bytes[6h], 12 * 3600) < 0
-            for: 5m
-            labels:
-              severity: warning
-            annotations:
-              summary: "Kubernetes Volume full in 12 hours (instance {{ $labels.instance }})"
-              description: "{{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }} is expected to fill up within four days. Currently {{ $value | humanize }}% is available.\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
           - alert: KubernetesPersistentVolumeError
             expr: kube_persistentvolume_status_phase{phase=~"Failed|Pending",job="kube-state-metrics"} > 0
             for: 5m
@@ -1761,14 +1724,6 @@ alert_manager:
             annotations:
               summary: "Kubernetes StatefulSet down (instance {{ $labels.instance }})"
               description: "A StatefulSet went down\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
-          - alert: KubernetesHpaScalingAbility
-            expr: kube_hpa_status_condition{condition="false", status="AbleToScale"} == 1
-            for: 5m
-            labels:
-              severity: warning
-            annotations:
-              summary: "Kubernetes HPA scaling ability (instance {{ $labels.instance }})"
-              description: "Pod is unable to scale\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
           - alert: KubernetesHpaMetricAvailability
             expr: kube_hpa_status_condition{condition="false", status="ScalingActive"} == 1
             for: 5m
@@ -1777,14 +1732,6 @@ alert_manager:
             annotations:
               summary: "Kubernetes HPA metric availability (instance {{ $labels.instance }})"
               description: "HPA is not able to collect metrics\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
-          - alert: KubernetesHpaScaleCapability
-            expr: kube_hpa_status_desired_replicas >= kube_hpa_spec_max_replicas
-            for: 5m
-            labels:
-              severity: warning
-            annotations:
-              summary: "Kubernetes HPA scale capability (instance {{ $labels.instance }})"
-              description: "The maximum number of desired Pods has been hit\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
           - alert: KubernetesPodNotHealthy
             expr: min_over_time(max by (kubernetes_node, namespace, pod) (kube_pod_status_phase{phase=~"Pending|Unknown|Failed"})[5m:]) == 1
             for: 5m
@@ -1801,30 +1748,6 @@ alert_manager:
             annotations:
               summary: "Kubernetes pod crash looping (instance {{ $labels.instance }})"
               description: "Pod {{ $labels.pod }} is crash looping\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
-          - alert: KubernetesReplicassetMismatch
-            expr: kube_replicaset_spec_replicas != kube_replicaset_status_ready_replicas
-            for: 5m
-            labels:
-              severity: warning
-            annotations:
-              summary: "Kubernetes ReplicasSet mismatch (instance {{ $labels.instance }})"
-              description: "Deployment Replicas mismatch\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
-          - alert: KubernetesDeploymentReplicasMismatch
-            expr: kube_deployment_spec_replicas != kube_deployment_status_replicas_available
-            for: 5m
-            labels:
-              severity: warning
-            annotations:
-              summary: "Kubernetes Deployment replicas mismatch (instance {{ $labels.instance }})"
-              description: "Deployment Replicas mismatch\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
-          - alert: KubernetesStatefulsetReplicasMismatch
-            expr: kube_statefulset_status_replicas_ready != kube_statefulset_status_replicas
-            for: 5m
-            labels:
-              severity: warning
-            annotations:
-              summary: "Kubernetes StatefulSet replicas mismatch (instance {{ $labels.instance }})"
-              description: "A StatefulSet has not matched the expected number of replicas for longer than 15 minutes.\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
           - alert: KubernetesDeploymentGenerationMismatch
             expr: kube_deployment_status_observed_generation != kube_deployment_metadata_generation
             for: 5m
@@ -2002,18 +1925,17 @@ pulsar_manager:
   ##
   service:
     # expose the load balancer
-    type: LoadBalancer
+    type: ClusterIP
     spec: {}
-    annotations:
-      service.beta.kubernetes.io/aws-load-balancer-ssl-cert: "arn:aws:acm:eu-west-1:268324876595:certificate/d65266d3-b4ab-43da-b35d-c75681ee6371"
+    annotations: {}
     ports:
-      frontend: 443
+      frontend: 80
   backend_service:
     spec:
       clusterIP: None
     annotations: { }
   ingress:
-    enabled: false
+    enabled: true
     annotations: {}
     ingressClassName: nginx-alb
   ## pulsar manager configmap
@@ -2038,7 +1960,7 @@ pulsar_manager:
         - --github.oauth.host=https://github.com/login/oauth/access_token \
         - --github.user.info=https://api.github.com/user \
         - --github.login.host=https://github.com/login/oauth/authorize \
-        - --github.redirect.host=https://pulsar-manager-preprod.singlespot.com \
+        - --github.redirect.host=https://pulsar-manager.singlespot.com \
         - --github.allowed.organizations=Singlespot \
   envFromSecret: pulsar-manager-secret
   spring:
@@ -2229,10 +2151,10 @@ partitionedTopics:
 
 prometheusJobs:
   - jobName: copy-api
-    host: pulsar-copy-metrics.singlespot.com
+    host: data-stream-copy-statsd.pulsar-services-prod.svc.cluster.local
   - jobName: geocoding-api
-    host: geocoding-api-metrics.singlespot.com
+    host: geocoding-api-statsd.pulsar-services-prod.svc.cluster.local
   - jobName: producer-api
-    host: pulsar-producer-metrics.singlespot.com
+    host: data-stream-producer-statsd.pulsar-services-prod.svc.cluster.local
 
 servicesNamespace: pulsar-services-prod
