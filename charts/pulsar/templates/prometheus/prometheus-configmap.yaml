@@ -56,7 +56,7 @@ data:
     {{- range .Values.prometheusJobs }}
     - job_name: '{{ .jobName }}'
       static_configs:
-      - targets: ['{{ .host }}:9102']
+      - targets: ['{{ .host }}:{{ default 9102 .port }}']
     {{- end }}
     - job_name: 'kubernetes-pods'
 {{- if .Values.auth.authentication.enabled }}

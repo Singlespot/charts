@@ -1432,6 +1432,17 @@ grafana:
   ## This can be useful for auth tokens, etc. Value is templated.
   envFromSecret: "grafana-github-secret"
 
+  datasources:
+    datasources.yaml:
+      apiVersion: 1
+      datasources:
+        - name: CloudWatch
+          type: cloudwatch
+          editable: true
+          jsonData:
+            authType: default
+            defaultRegion: eu-west-1
+
   ## Reference to external ConfigMap per provider. Use provider name as key and ConfiMap name as value.
   ## A provider dashboards must be defined either by external ConfigMaps or in values.yaml, not in both.
   ## ConfigMap data example:
@@ -1442,6 +1453,53 @@ grafana:
   ##
   dashboardsConfigMaps: {}
   #  default: ""
+
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+        - name: 'extra'
+          orgId: 1
+          folder: 'Extra'
+          type: file
+          disableDeletion: true
+          editable: true
+          allowUiUpdates: true
+          options:
+            path: /var/lib/grafana/dashboards/extra
+
+  dashboards:
+    extra:
+      geocode-france:
+        gnetId: 9628
+        datasource: Prometheus
+      kubernetes-cluster:
+        gnetId: 7249
+        datasource: Prometheus
+      kubernetes-cluster-monitoring-prometheus:
+        gnetId: 1621
+        datasource: Prometheus
+      node-exporter-full:
+        gnetId: 1860
+        datasource: Prometheus
+      node-metrics:
+        gnetId: 159
+        datasource: Prometheus
+      aws-elasticache-redis:
+        gnetId: 969
+        datasource: CloudWatch
+      aws-s3:
+        gnetId: 575
+        datasource: CloudWatch
+      aws-alb:
+        gnetId: 650
+        datasource: CloudWatch
+      aws-classic-elb:
+        gnetId: 644
+        datasource: CloudWatch
+      aws-sqs:
+        gnetId: 584
+        datasource: CloudWatch
 
   ## Grafana's primary configuration
   ## NOTE: values in map will be converted to ini format
@@ -2165,5 +2223,8 @@ prometheusJobs:
     host: geocoding-api-statsd.pulsar-services-prod.svc.cluster.local
   - jobName: producer-api
     host: data-stream-producer-statsd.pulsar-services-prod.svc.cluster.local
+  - jobName: geocode-france
+    host: geocode-france.singlespot.com
+    port: 9187
 
 servicesNamespace: pulsar-services-prod
