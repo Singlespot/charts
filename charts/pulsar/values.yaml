@@ -1401,6 +1401,7 @@ grafana:
     enabled: true
     storageClassName: gp2
     size: 10Gi
+    type: statefulset
     finalizers:
       - kubernetes.io/pvc-protection
 
@@ -1448,9 +1449,9 @@ grafana:
   ##
   grafana.ini:
     paths:
-      data: /var/lib/grafana/pulsar/data
+      data: /var/lib/grafana
       logs: /var/log/grafana
-      plugins: /var/lib/grafana/pulsar/plugins
+      plugins: /var/lib/grafana/plugins
       provisioning: /etc/grafana/provisioning
     analytics:
       check_for_updates: true
@@ -1516,6 +1517,22 @@ grafana:
       # Otherwise the namespace in which the sidecar is running will be used.
       # It's also possible to specify ALL to search in all namespaces
       searchNamespace: null
+
+## Loki-stack dependency
+##
+loki-stack:
+  loki:
+    persistence:
+      enabled: true
+      size: 10Gi
+    config:
+      table_manager:
+        retention_deletes_enabled: true
+        retention_period: 336h
+  grafana:
+    enabled: false
+  prometheus:
+    enabled: false
 
 ## Monitoring Stack: node_exporter
 ## templates/node-exporter.yaml
@@ -1614,14 +1631,6 @@ alert_manager:
             annotations:
               summary: "Host out of disk space (instance {{ $labels.instance }})"
               description: "Disk is almost full (< 10% left)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
-          - alert: HostHighCpuLoad
-            expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
-            for: 5m
-            labels:
-              severity: warning
-            annotations:
-              summary: "Host high CPU load (instance {{ $labels.instance }})"
-              description: "CPU load is > 80%\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
 
       - name: Containers
         rules:

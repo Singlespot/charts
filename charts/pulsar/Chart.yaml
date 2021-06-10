@@ -31,9 +31,9 @@ maintainers:
   email: support@streamnative.io
 dependencies:
 - name: loki-stack
-  version: 2.3.1
+  version: 2.4.1
   repository: https://grafana.github.io/helm-charts
   condition: monitoring.loki
 - name: grafana
-  version: 6.6.3
+  version: 6.12.0
   repository: https://grafana.github.io/helm-charts
